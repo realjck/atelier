@@ -14,14 +14,18 @@ interface ProjectTableProps {
   onOpenUrl: (url: string) => void;
 }
 
-const COLUMNS: { key: SortKey; label: string }[] = [
-  { key: "name", label: "Name" },
-  { key: "category", label: "Category" },
-  { key: "created", label: "Created" },
-  { key: "state", label: "State" },
+/**
+ * Fixed table layout: the table never scrolls sideways, cells truncate instead.
+ * Columns with predictable content get fixed widths; Path takes what is left.
+ */
+const COLUMNS: { key: SortKey; label: string; width?: string }[] = [
+  { key: "name", label: "Name", width: "22%" },
+  { key: "category", label: "Category", width: "13%" },
+  { key: "created", label: "Created", width: "130px" },
+  { key: "state", label: "State", width: "15%" },
   { key: "path", label: "Path" },
-  { key: "repo", label: "Repo" },
-  { key: "status", label: "Status" },
+  { key: "repo", label: "Repo", width: "84px" },
+  { key: "status", label: "Status", width: "112px" },
 ];
 
 const dateFormat = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -54,6 +58,11 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
   return (
     <div className="table-wrap">
       <table className="table">
+        <colgroup>
+          {COLUMNS.map((col) => (
+            <col key={col.key} style={{ width: col.width }} />
+          ))}
+        </colgroup>
         <thead>
           <tr>
             {COLUMNS.map((col) => (
@@ -62,7 +71,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
                 aria-sort={sort.key === col.key ? (sort.dir === "asc" ? "ascending" : "descending") : undefined}
               >
                 <button type="button" className="th-btn" onClick={() => toggleSort(col.key)}>
-                  {col.label}
+                  <span className="th-label">{col.label}</span>
                   <SortIcon className={sort.key === col.key ? "sort-active" : undefined} />
                 </button>
               </th>
@@ -84,11 +93,17 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
             const ProviderIcon = provider ? PROVIDER_ICONS[provider] : null;
             return (
               <tr key={p.id} className="row" tabIndex={0} onClick={() => onOpen(p)} onKeyDown={(e) => onRowKey(e, p)}>
-                <td className="cell-name">{p.name}</td>
-                <td>{category && <Pill color={category.color} label={category.name} />}</td>
+                <td className="cell-name" title={p.name}>
+                  {p.name}
+                </td>
+                <td>
+                  <div className="cell-box">{category && <Pill color={category.color} label={category.name} />}</div>
+                </td>
                 <td className="cell-muted">{formatDate(p.created)}</td>
                 <td>
-                  <Pill color={state.color} label={state.label} />
+                  <div className="cell-box">
+                    <Pill color={state.color} label={state.label} />
+                  </div>
                 </td>
                 <td>
                   {p.localPath && (
