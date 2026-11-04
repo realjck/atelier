@@ -100,10 +100,9 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
                   <div className="cell-box">{category && <Pill color={category.color} label={category.name} />}</div>
                 </td>
                 <td className="cell-muted">{formatDate(p.created)}</td>
-                <td>
-                  <div className="cell-box">
-                    <Pill color={state.color} label={state.label} />
-                  </div>
+                <td title={state.label}>
+                  <span className="dot" style={{ background: state.color }} />
+                  <span className="state-label">{state.label}</span>
                 </td>
                 <td>
                   {p.localPath && (

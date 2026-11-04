@@ -391,6 +391,12 @@ button {
   color: var(--muted);
 }
 
+/* States read as a colored dot with neutral text; tinted pills are kept for categories. */
+.state-label {
+  margin-left: 9px;
+  font-size: 14px;
+}
+
 .link-btn {
   padding: 4px 6px;
   margin: 0 -6px;
