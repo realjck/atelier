@@ -27,6 +27,7 @@ pub fn open(path: &Path) -> AppResult<Connection> {
     prepare(Connection::open(path)?)
 }
 
+#[cfg(test)]
 pub fn open_in_memory() -> AppResult<Connection> {
     prepare(Connection::open_in_memory()?)
 }
