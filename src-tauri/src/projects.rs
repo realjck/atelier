@@ -101,18 +101,24 @@ fn clean(input: &ProjectInput) -> AppResult<ProjectInput> {
         category_id: input.category_id,
         created: created.to_string(),
         state: input.state,
-        local_path: optional(&input.local_path),
+        local_path: optional_path(&input.local_path),
         repo_url: optional(&input.repo_url),
         prod_url: optional(&input.prod_url),
     })
 }
 
 fn optional(value: &Option<String>) -> Option<String> {
-    value
-        .as_deref()
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .map(String::from)
+    clean_text(value.as_deref()?)
+}
+
+/// Like `optional`, but also drops the double quotes added by Explorer's "Copy as path".
+fn optional_path(value: &Option<String>) -> Option<String> {
+    clean_text(value.as_deref()?.trim().trim_matches('"'))
+}
+
+fn clean_text(s: &str) -> Option<String> {
+    let s = s.trim();
+    (!s.is_empty()).then(|| s.to_string())
 }
 
 #[cfg(test)]
@@ -168,6 +174,15 @@ mod tests {
         assert_eq!(created.local_path, None);
         assert_eq!(created.prod_url, None);
         assert_eq!(created.repo_url.as_deref(), Some("https://gitlab.com/x"));
+    }
+
+    #[test]
+    fn strips_quotes_from_pasted_path() {
+        let conn = db::open_in_memory().unwrap();
+        let mut p = input("P", "2025-04-12");
+        p.local_path = Some(r#" "E:\projects\x" "#.into());
+        let created = create(&conn, &p).unwrap();
+        assert_eq!(created.local_path.as_deref(), Some(r"E:\projects\x"));
     }
 
     #[test]

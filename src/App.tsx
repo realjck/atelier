@@ -76,35 +76,39 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <Header query={query} onQueryChange={setQuery} onNewProject={() => setEditing("new")} />
-      <div className="toolbar">
-        <FilterBar value={filter} onChange={setFilter} />
-        <button
-          type="button"
-          className="btn btn-manage"
-          aria-expanded={categoriesOpen}
-          {...{ [PANEL_TRIGGER_ATTR]: "" }}
-          onClick={() => setCategoriesOpen((o) => !o)}
-        >
-          <PencilIcon width={15} height={15} />
-          Manage Categories
-          <ChevronDownIcon width={15} height={15} />
-        </button>
-        {categoriesOpen && (
-          <CategoryPanel categories={categories} onSave={saveCategories} onClose={closeCategories} />
-        )}
+    <>
+      {/* Inert while the modal is open so keyboard focus cannot reach rows behind it. */}
+      <div className="app" inert={editing !== null}>
+        <Header query={query} onQueryChange={setQuery} onNewProject={() => setEditing("new")} />
+        <div className="toolbar">
+          <FilterBar value={filter} onChange={setFilter} />
+          <button
+            type="button"
+            className="btn btn-manage"
+            aria-expanded={categoriesOpen}
+            {...{ [PANEL_TRIGGER_ATTR]: "" }}
+            onClick={() => setCategoriesOpen((o) => !o)}
+          >
+            <PencilIcon width={15} height={15} />
+            Manage Categories
+            <ChevronDownIcon width={15} height={15} />
+          </button>
+          {categoriesOpen && (
+            <CategoryPanel categories={categories} onSave={saveCategories} onClose={closeCategories} />
+          )}
+        </div>
+        <ProjectTable
+          projects={filterProjects(projects, filter, query, categories)}
+          categories={categories}
+          onOpen={setEditing}
+          onOpenFolder={(path) => run(() => api.openFolder(path))}
+          onOpenUrl={(url) => run(() => api.openUrl(url))}
+        />
+        <DbFolderButton onClick={() => run(api.openDbFolder)} />
       </div>
-      <ProjectTable
-        projects={filterProjects(projects, filter, query, categories)}
-        categories={categories}
-        onOpen={setEditing}
-        onOpenFolder={(path) => run(() => api.openFolder(path))}
-        onOpenUrl={(url) => run(() => api.openUrl(url))}
-      />
-      <DbFolderButton onClick={() => run(api.openDbFolder)} />
       {editing && (
         <ProjectModal
+          key={editing === "new" ? "new" : editing.id}
           project={editing === "new" ? null : editing}
           categories={categories}
           onSave={saveProject}
@@ -113,7 +117,7 @@ function App() {
         />
       )}
       {error && <ErrorToast message={error} onClose={clearError} />}
-    </div>
+    </>
   );
 }
 

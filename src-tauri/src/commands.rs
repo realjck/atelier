@@ -69,7 +69,7 @@ pub fn open_folder(app: AppHandle, path: String) -> AppResult<()> {
 
 #[tauri::command]
 pub fn open_url(app: AppHandle, url: String) -> AppResult<()> {
-    let url = system::normalize_url(&url)?;
+    let url = system::normalize_url(&system::repo_web_url(&url))?;
     app.opener().open_url(url, None::<&str>).map_err(io)
 }
 
