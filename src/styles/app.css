@@ -609,3 +609,153 @@ button {
   border-color: #f36d8d;
   color: #fff;
 }
+
+/* Manage Categories */
+.btn-manage {
+  flex: none;
+  align-self: flex-start;
+  border-color: rgb(139 108 255 / 0.45);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.btn-manage svg:first-child {
+  color: var(--accent-2);
+}
+
+.cat-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+  z-index: 30;
+}
+
+.cat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cat-head h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.cat-list {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.cat-row {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cat-swatch {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+}
+
+.cat-name {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  outline: 0;
+  font-size: 15px;
+}
+
+.cat-name:hover {
+  border-color: var(--border);
+}
+
+.cat-name:focus {
+  border-color: var(--accent-2);
+  background: #0e0c1d;
+}
+
+.cat-row .icon-btn:hover {
+  color: var(--danger);
+}
+
+.cat-error {
+  width: 100%;
+  padding-left: 30px;
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.palette {
+  display: grid;
+  grid-template-columns: repeat(5, 22px);
+  gap: 8px;
+  width: 100%;
+  padding: 8px 0 6px 30px;
+}
+
+.palette-swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+}
+
+.palette-swatch[aria-pressed="true"] {
+  border-color: #fff;
+}
+
+.cat-add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #0e0c1d;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.cat-add:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.cat-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.cat-actions .btn {
+  height: 44px;
+  font-size: 15px;
+}
