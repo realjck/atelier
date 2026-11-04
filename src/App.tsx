@@ -1,8 +1,12 @@
+import { useState } from "react";
+import { Header } from "./components/Header";
+
 function App() {
+  const [query, setQuery] = useState("");
   return (
-    <main>
-      <h1>Atelier</h1>
-    </main>
+    <div className="app">
+      <Header query={query} onQueryChange={setQuery} onNewProject={() => {}} />
+    </div>
   );
 }
 
