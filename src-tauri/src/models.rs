@@ -55,3 +55,37 @@ pub struct CategoryDraft {
     pub name: String,
     pub color: String,
 }
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Project {
+    pub id: i64,
+    pub name: String,
+    pub category_id: Option<i64>,
+    /// Creation date as `YYYY-MM-DD`.
+    pub created: String,
+    pub state: State,
+    pub local_path: Option<String>,
+    pub repo_url: Option<String>,
+    pub prod_url: Option<String>,
+}
+
+/// Fields of a project as submitted by the UI (no id).
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectInput {
+    pub name: String,
+    pub category_id: Option<i64>,
+    pub created: String,
+    pub state: State,
+    pub local_path: Option<String>,
+    pub repo_url: Option<String>,
+    pub prod_url: Option<String>,
+}
+
+impl rusqlite::types::FromSql for State {
+    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
+        let text = value.as_str()?;
+        State::parse(text).map_err(|e| rusqlite::types::FromSqlError::Other(Box::new(e)))
+    }
+}
