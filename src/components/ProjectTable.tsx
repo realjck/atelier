@@ -12,6 +12,8 @@ interface ProjectTableProps {
   onOpen: (project: Project) => void;
   onOpenFolder: (path: string) => void;
   onOpenUrl: (url: string) => void;
+  /** Identifies the current view (filter, search); the list scrolls back to the top when it changes. */
+  viewKey: string;
   /** Asks to move a project just before or after another, in priority order. */
   onMove: (movedId: number, targetId: number, place: "before" | "after") => void;
 }
@@ -61,7 +63,7 @@ function clamp(offset: number, min: number, max: number, origin: number): number
 
 const PROVIDER_ICONS ={ github: GithubIcon, gitlab: GitlabIcon, git: GitIcon };
 
-export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpenUrl, onMove }: ProjectTableProps) {
+export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpenUrl, viewKey, onMove }: ProjectTableProps) {
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "created", dir: "desc" });
   const [drag, setDrag] = useState<Drag | null>(null);
   const rows = sortProjects(projects, sort.key, sort.dir, categories);
@@ -100,6 +102,10 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
       wrap.removeEventListener("scroll", onScroll);
     };
   });
+
+  useEffect(() => {
+    wrapRef.current!.scrollTop = 0;
+  }, [viewKey]);
 
   /** Auto-scrolls while the pointer is near the list's top (below the sticky header) or bottom edge. */
   useEffect(() => {

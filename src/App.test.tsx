@@ -90,4 +90,18 @@ describe("App", () => {
     expect(api.reorderProjects).toHaveBeenCalledWith([2, 1, 3]);
     expect(within(screen.getByText("Beta").closest("tr")!).getAllByRole("cell")[0]).toHaveTextContent("1");
   });
+
+  it("changing_filter_or_search_scrolls_the_list_back_to_the_top", async () => {
+    render(<App />);
+    await screen.findByText("Alpha");
+    const wrap = screen.getByRole("table").parentElement!;
+
+    wrap.scrollTop = 200;
+    await userEvent.click(within(screen.getByRole("group", { name: "Filter projects" })).getByRole("button", { name: "Draft" }));
+    expect(wrap.scrollTop).toBe(0);
+
+    wrap.scrollTop = 200;
+    await userEvent.type(screen.getByLabelText("Search projects"), "a");
+    expect(wrap.scrollTop).toBe(0);
+  });
 });

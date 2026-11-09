@@ -119,6 +119,7 @@ function App() {
           onOpen={setEditing}
           onOpenFolder={(path) => run(() => api.openFolder(path))}
           onOpenUrl={(url) => run(() => api.openUrl(url))}
+          viewKey={`${filter}|${query}`}
           onMove={moveInPriority}
         />
         <DbFolderButton onClick={() => run(api.openDbFolder)} />

@@ -33,7 +33,7 @@ const offline: Project = {
 
 function setup(projects: Project[] = [online, offline]) {
   const handlers = { onOpen: vi.fn(), onOpenFolder: vi.fn(), onOpenUrl: vi.fn(), onMove: vi.fn() };
-  render(<ProjectTable projects={projects} categories={categories} {...handlers} />);
+  render(<ProjectTable projects={projects} categories={categories} viewKey="all|" {...handlers} />);
   return handlers;
 }
 
