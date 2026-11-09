@@ -3,7 +3,7 @@ import { dropIndex, edgeScrollSpeed, sortProjects, type SortDir, type SortKey } 
 import { detectProvider } from "../lib/repo";
 import { stateMeta } from "../lib/states";
 import type { Category, Project } from "../types";
-import { GitIcon, GithubIcon, GitlabIcon, GripIcon, SortIcon } from "./Icons";
+import { GitIcon, GithubIcon, GitlabIcon, GripIcon, SortDirIcon, SortIcon } from "./Icons";
 import { Pill } from "./Pill";
 
 interface ProjectTableProps {
@@ -185,7 +185,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
               >
                 <button type="button" className="th-btn" onClick={() => toggleSort(col.key)}>
                   <span className="th-label">{col.label}</span>
-                  <SortIcon className={sort.key === col.key ? "sort-active" : undefined} />
+                  {sort.key === col.key ? <SortDirIcon dir={sort.dir} className="sort-active" /> : <SortIcon />}
                 </button>
               </th>
             ))}

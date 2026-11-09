@@ -346,7 +346,7 @@ button {
 
 .th-btn svg {
   flex: none;
-  opacity: 0.5;
+  opacity: 0.35;
 }
 
 .th-btn .sort-active {
@@ -403,8 +403,14 @@ button {
   color: var(--accent-2);
 }
 
-.table-reorderable th:first-child {
+/* The sorted column is underlined in the accent color. */
+.table th[aria-sort] {
   background: linear-gradient(var(--accent-2), var(--accent-2)) bottom / 100% 2px no-repeat, var(--surface);
+}
+
+.table th[aria-sort] .th-btn {
+  color: var(--text);
+  font-weight: 500;
 }
 
 .grip {

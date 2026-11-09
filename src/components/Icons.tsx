@@ -65,6 +65,13 @@ export const SortIcon = (p: IconProps) => (
   </Stroke>
 );
 
+/** Single chevron for the sorted column: up for ascending, down for descending. */
+export const SortDirIcon = ({ dir, ...p }: IconProps & { dir: "asc" | "desc" }) => (
+  <Stroke width="14" height="14" strokeWidth="2.2" data-dir={dir} {...p}>
+    <path d={dir === "asc" ? "m6 15 6-6 6 6" : "m6 9 6 6 6-6"} />
+  </Stroke>
+);
+
 export const GripIcon = (p: IconProps) => (
   <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor" aria-hidden="true" {...p}>
     <circle cx="2.5" cy="3" r="1.5" />

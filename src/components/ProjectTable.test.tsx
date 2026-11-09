@@ -189,6 +189,19 @@ describe("ProjectTable", () => {
     expect(h.onMove).not.toHaveBeenCalled();
   });
 
+  it("sorted_column_shows_a_single_chevron_in_the_sort_direction", async () => {
+    setup();
+    const header = () => screen.getByRole("columnheader", { name: "Name" });
+    const chevron = () => header().querySelector("svg")!.dataset.dir;
+    expect(header()).not.toHaveAttribute("aria-sort");
+    expect(chevron()).toBeUndefined();
+    await userEvent.click(screen.getByRole("button", { name: "Name" }));
+    expect(header()).toHaveAttribute("aria-sort", "ascending");
+    expect(chevron()).toBe("asc");
+    await userEvent.click(screen.getByRole("button", { name: "Name" }));
+    expect(chevron()).toBe("desc");
+  });
+
   it("shows an empty state", () => {
     setup([]);
     expect(screen.getByText("No projects yet")).toBeInTheDocument();
