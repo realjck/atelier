@@ -295,6 +295,7 @@ button {
 .chip[aria-pressed="true"] {
   background: var(--accent);
   border-color: var(--accent);
+  color: var(--on-accent);
   box-shadow: var(--glow);
 }
 
