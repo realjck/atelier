@@ -134,6 +134,26 @@ describe("ProjectTable", () => {
     expect(h.onMove).toHaveBeenCalledWith(1, 3, "after");
   });
 
+  it("auto_scrolls_up_near_the_sticky_header_once_scrolled_down", async () => {
+    setup([online, offline, third]);
+    await userEvent.click(screen.getByRole("button", { name: "#" }));
+    const wrap = screen.getByRole("table").parentElement!;
+    wrap.scrollTop = 300;
+    wrap.getBoundingClientRect = () => ({ top: 100, bottom: 600 }) as DOMRect;
+    // The header cells stick to the top of the list; the thead itself scrolled away.
+    screen.getAllByRole("columnheader")[0].getBoundingClientRect = () => ({ bottom: 152 }) as DOMRect;
+    wrap.querySelector("thead")!.getBoundingClientRect = () => ({ bottom: -148 }) as DOMRect;
+    vi.useFakeTimers({ toFake: ["requestAnimationFrame", "cancelAnimationFrame"] });
+    try {
+      pressAndMove("Blog", 160);
+      vi.advanceTimersToNextFrame();
+      expect(wrap.scrollTop).toBeLessThan(300);
+    } finally {
+      fireEvent.pointerUp(window);
+      vi.useRealTimers();
+    }
+  });
+
   it("dragged_row_stays_within_the_list", async () => {
     setup([online, offline, third]);
     await userEvent.click(screen.getByRole("button", { name: "#" }));

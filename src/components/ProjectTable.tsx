@@ -104,7 +104,8 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
   useEffect(() => {
     if (!dragging) return;
     const wrap = wrapRef.current!;
-    const header = wrap.querySelector("thead")!;
+    // The th cells are sticky, not the thead, which scrolls away with the rows.
+    const header = wrap.querySelector("th")!;
     let frame = requestAnimationFrame(function step() {
       const speed = edgeScrollSpeed(
         pointerY.current,
