@@ -73,6 +73,8 @@ describe("App", () => {
   });
 
   it("persists a drag reorder and renumbers rows right away", async () => {
+    const archived: Project = { ...base, id: 3, name: "Gamma", state: "archived", priority: 3 };
+    vi.mocked(api.listProjects).mockResolvedValue([alpha, beta, archived]);
     vi.mocked(api.reorderProjects).mockReturnValue(new Promise(() => {}));
     render(<App />);
     await userEvent.click(await screen.findByRole("button", { name: "#" }));
@@ -84,7 +86,8 @@ describe("App", () => {
     fireEvent.pointerMove(window, { clientY: 110 });
     fireEvent.pointerUp(window);
 
-    expect(api.reorderProjects).toHaveBeenCalledWith([2, 1]);
+    // Hidden (archived) projects must be part of the new order too.
+    expect(api.reorderProjects).toHaveBeenCalledWith([2, 1, 3]);
     expect(within(screen.getByText("Beta").closest("tr")!).getAllByRole("cell")[0]).toHaveTextContent("1");
   });
 });

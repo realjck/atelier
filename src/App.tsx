@@ -8,7 +8,7 @@ import { Header } from "./components/Header";
 import { ChevronDownIcon, PencilIcon } from "./components/Icons";
 import { ProjectModal } from "./components/ProjectModal";
 import { ProjectTable } from "./components/ProjectTable";
-import { filterProjects, type Filter } from "./lib/projectList";
+import { filterProjects, moveProject, type Filter } from "./lib/projectList";
 import type { Category, CategoryDraft, Project, ProjectInput } from "./types";
 
 function App() {
@@ -65,8 +65,12 @@ function App() {
     });
   }
 
-  /** Renumbers locally first so the dropped row does not jump back while the save is in flight. */
-  function reorderProjects(ids: number[]) {
+  /**
+   * Reorders against the full list, hidden projects included, since the backend
+   * requires every id. Renumbers locally first so the row does not jump back while saving.
+   */
+  function moveInPriority(movedId: number, targetId: number, place: "before" | "after") {
+    const ids = moveProject(projects, movedId, targetId, place);
     setProjects((list) => list.map((p) => ({ ...p, priority: ids.indexOf(p.id) + 1 })));
     run(async () => {
       try {
@@ -115,7 +119,7 @@ function App() {
           onOpen={setEditing}
           onOpenFolder={(path) => run(() => api.openFolder(path))}
           onOpenUrl={(url) => run(() => api.openUrl(url))}
-          onReorder={reorderProjects}
+          onMove={moveInPriority}
         />
         <DbFolderButton onClick={() => run(api.openDbFolder)} />
       </div>

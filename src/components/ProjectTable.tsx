@@ -1,5 +1,5 @@
 import { useEffect, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
-import { moveProject, sortProjects, type SortDir, type SortKey } from "../lib/projectList";
+import { sortProjects, type SortDir, type SortKey } from "../lib/projectList";
 import { detectProvider } from "../lib/repo";
 import { stateMeta } from "../lib/states";
 import type { Category, Project } from "../types";
@@ -12,8 +12,8 @@ interface ProjectTableProps {
   onOpen: (project: Project) => void;
   onOpenFolder: (path: string) => void;
   onOpenUrl: (url: string) => void;
-  /** Receives every project id, highest priority first. */
-  onReorder: (ids: number[]) => void;
+  /** Asks to move a project just before or after another, in priority order. */
+  onMove: (movedId: number, targetId: number, place: "before" | "after") => void;
 }
 
 /** A row being dragged, and where it would land relative to the hovered row. */
@@ -46,7 +46,7 @@ export function formatDate(isoDate: string): string {
 
 const PROVIDER_ICONS = { github: GithubIcon, gitlab: GitlabIcon, git: GitIcon };
 
-export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpenUrl, onReorder }: ProjectTableProps) {
+export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpenUrl, onMove }: ProjectTableProps) {
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "created", dir: "desc" });
   const [drag, setDrag] = useState<Drag | null>(null);
   const rows = sortProjects(projects, sort.key, sort.dir, categories);
@@ -80,9 +80,9 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
   function drop(movedId: number, targetId: number, half: "upper" | "lower") {
     if (movedId === targetId) return;
     const before = (half === "upper") === (sort.dir === "asc");
-    const ids = moveProject(projects, movedId, targetId, before ? "before" : "after");
-    const current = sortProjects(projects, "priority", "asc", []).map((p) => p.id);
-    if (ids.some((id, i) => id !== current[i])) onReorder(ids);
+    const neighbor = rows[rows.findIndex((p) => p.id === targetId) + (half === "upper" ? -1 : 1)];
+    if (neighbor?.id === movedId) return;
+    onMove(movedId, targetId, before ? "before" : "after");
   }
 
   function startDrag(e: PointerEvent, id: number) {

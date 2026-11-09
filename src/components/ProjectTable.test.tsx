@@ -32,7 +32,7 @@ const offline: Project = {
 };
 
 function setup(projects: Project[] = [online, offline]) {
-  const handlers = { onOpen: vi.fn(), onOpenFolder: vi.fn(), onOpenUrl: vi.fn(), onReorder: vi.fn() };
+  const handlers = { onOpen: vi.fn(), onOpenFolder: vi.fn(), onOpenUrl: vi.fn(), onMove: vi.fn() };
   render(<ProjectTable projects={projects} categories={categories} {...handlers} />);
   return handlers;
 }
@@ -109,7 +109,7 @@ describe("ProjectTable", () => {
     const h = setup([online, offline, third]);
     await userEvent.click(screen.getByRole("button", { name: "#" }));
     drag("Blog", "Api", "upper");
-    expect(h.onReorder).toHaveBeenCalledWith([1, 3, 2]);
+    expect(h.onMove).toHaveBeenCalledWith(3, 2, "before");
     expect(h.onOpen).not.toHaveBeenCalled();
   });
 
@@ -119,7 +119,7 @@ describe("ProjectTable", () => {
     await userEvent.click(screen.getByRole("button", { name: "#" }));
     expect(rowNames()).toEqual(["Blog", "Api", "Portfolio site redesign"]);
     drag("Portfolio site redesign", "Api", "upper");
-    expect(h.onReorder).toHaveBeenCalledWith([2, 1, 3]);
+    expect(h.onMove).toHaveBeenCalledWith(1, 2, "after");
   });
 
   it("dropping_in_place_does_not_reorder", async () => {
@@ -127,7 +127,7 @@ describe("ProjectTable", () => {
     await userEvent.click(screen.getByRole("button", { name: "#" }));
     drag("Api", "Api", "lower");
     drag("Api", "Blog", "upper");
-    expect(h.onReorder).not.toHaveBeenCalled();
+    expect(h.onMove).not.toHaveBeenCalled();
   });
 
   it("shows an empty state", () => {
