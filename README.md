@@ -20,6 +20,8 @@ Built with Tauri 2 (Rust + SQLite) and React + TypeScript.
 - **Filters, search and sorting**. Archived projects are hidden unless the Archived filter
   is selected.
 - **Categories** with colors, managed on the fly from the Manage Categories panel.
+- **Light and dark themes**: follows the OS theme until you flip the switch in the
+  bottom-right corner; the choice is then remembered.
 - **Local data**: a single SQLite file (`%APPDATA%\com.atelier.app\atelier.db`), whose folder
   opens from the gear button in the bottom-right corner.
 
