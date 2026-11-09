@@ -355,9 +355,9 @@ button {
   .col-created {
     width: 120px;
   }
-  /* Just fits "In Progress" (about 75px of text) after the dot. */
+  /* Long labels ("In Progress", "Completed") truncate with an ellipsis; the cell title shows them. */
   .col-state {
-    width: 108px;
+    width: 96px;
   }
 
   .cell-state {
