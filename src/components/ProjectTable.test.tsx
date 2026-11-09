@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { Category, Project } from "../types";
@@ -32,7 +32,7 @@ const offline: Project = {
 };
 
 function setup(projects: Project[] = [online, offline]) {
-  const handlers = { onOpen: vi.fn(), onOpenFolder: vi.fn(), onOpenUrl: vi.fn() };
+  const handlers = { onOpen: vi.fn(), onOpenFolder: vi.fn(), onOpenUrl: vi.fn(), onReorder: vi.fn() };
   render(<ProjectTable projects={projects} categories={categories} {...handlers} />);
   return handlers;
 }
@@ -41,7 +41,20 @@ const rowNames = () =>
   screen
     .getAllByRole("row")
     .slice(1)
-    .map((row) => within(row).getAllByRole("cell")[0].textContent);
+    .map((row) => within(row).getAllByRole("cell")[1].textContent);
+
+const third: Project = { ...offline, id: 3, name: "Blog", priority: 3 };
+
+/** Drags the handle of `from` and drops it on the upper or lower half of the row of `to`. */
+function drag(from: string, to: string, half: "upper" | "lower") {
+  const target = screen.getByText(to).closest("tr")!;
+  target.getBoundingClientRect = () => ({ top: 100, height: 50 }) as DOMRect;
+  document.elementFromPoint = () => target;
+  const handle = within(screen.getByText(from).closest("tr")!).getByRole("button", { name: /drag to reorder/i });
+  fireEvent.pointerDown(handle, { button: 0, clientX: 5, clientY: 0 });
+  fireEvent.pointerMove(window, { clientX: 5, clientY: half === "upper" ? 110 : 140 });
+  fireEvent.pointerUp(window);
+}
 
 describe("ProjectTable", () => {
   it("renders the formatted date, category and state pills", () => {
@@ -77,6 +90,44 @@ describe("ProjectTable", () => {
     expect(rowNames()).toEqual(["Api", "Portfolio site redesign"]);
     await userEvent.click(screen.getByRole("button", { name: "Name" }));
     expect(rowNames()).toEqual(["Portfolio site redesign", "Api"]);
+  });
+
+  it("shows_priority_in_the_first_column", () => {
+    setup();
+    const cells = within(screen.getByText("Api").closest("tr")!).getAllByRole("cell");
+    expect(cells[0]).toHaveTextContent("2");
+  });
+
+  it("drag_handles_only_when_sorted_by_priority", async () => {
+    setup();
+    expect(screen.queryAllByRole("button", { name: /drag to reorder/i })).toHaveLength(0);
+    await userEvent.click(screen.getByRole("button", { name: "#" }));
+    expect(screen.getAllByRole("button", { name: /drag to reorder/i })).toHaveLength(2);
+  });
+
+  it("drop_on_upper_half_places_before_in_ascending_order", async () => {
+    const h = setup([online, offline, third]);
+    await userEvent.click(screen.getByRole("button", { name: "#" }));
+    drag("Blog", "Api", "upper");
+    expect(h.onReorder).toHaveBeenCalledWith([1, 3, 2]);
+    expect(h.onOpen).not.toHaveBeenCalled();
+  });
+
+  it("drop_on_upper_half_places_after_in_descending_order", async () => {
+    const h = setup([online, offline, third]);
+    await userEvent.click(screen.getByRole("button", { name: "#" }));
+    await userEvent.click(screen.getByRole("button", { name: "#" }));
+    expect(rowNames()).toEqual(["Blog", "Api", "Portfolio site redesign"]);
+    drag("Portfolio site redesign", "Api", "upper");
+    expect(h.onReorder).toHaveBeenCalledWith([2, 1, 3]);
+  });
+
+  it("dropping_in_place_does_not_reorder", async () => {
+    const h = setup([online, offline, third]);
+    await userEvent.click(screen.getByRole("button", { name: "#" }));
+    drag("Api", "Api", "lower");
+    drag("Api", "Blog", "upper");
+    expect(h.onReorder).not.toHaveBeenCalled();
   });
 
   it("shows an empty state", () => {

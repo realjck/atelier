@@ -1,9 +1,9 @@
-import { useState, type KeyboardEvent, type MouseEvent } from "react";
-import { sortProjects, type SortDir, type SortKey } from "../lib/projectList";
+import { useEffect, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { moveProject, sortProjects, type SortDir, type SortKey } from "../lib/projectList";
 import { detectProvider } from "../lib/repo";
 import { stateMeta } from "../lib/states";
 import type { Category, Project } from "../types";
-import { GitIcon, GithubIcon, GitlabIcon, SortIcon } from "./Icons";
+import { GitIcon, GithubIcon, GitlabIcon, GripIcon, SortIcon } from "./Icons";
 import { Pill } from "./Pill";
 
 interface ProjectTableProps {
@@ -12,6 +12,14 @@ interface ProjectTableProps {
   onOpen: (project: Project) => void;
   onOpenFolder: (path: string) => void;
   onOpenUrl: (url: string) => void;
+  /** Receives every project id, highest priority first. */
+  onReorder: (ids: number[]) => void;
+}
+
+/** A row being dragged, and where it would land relative to the hovered row. */
+interface Drag {
+  id: number;
+  over: { id: number; half: "upper" | "lower" } | null;
 }
 
 /**
@@ -19,6 +27,7 @@ interface ProjectTableProps {
  * Columns with predictable content get fixed widths; Path takes what is left.
  */
 const COLUMNS: { key: SortKey; label: string; width?: string }[] = [
+  { key: "priority", label: "#", width: "84px" },
   { key: "name", label: "Name", width: "22%" },
   { key: "category", label: "Category", width: "13%" },
   { key: "created", label: "Created", width: "130px" },
@@ -37,9 +46,57 @@ export function formatDate(isoDate: string): string {
 
 const PROVIDER_ICONS = { github: GithubIcon, gitlab: GitlabIcon, git: GitIcon };
 
-export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpenUrl }: ProjectTableProps) {
+export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpenUrl, onReorder }: ProjectTableProps) {
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "created", dir: "desc" });
+  const [drag, setDrag] = useState<Drag | null>(null);
   const rows = sortProjects(projects, sort.key, sort.dir, categories);
+  const reorderable = sort.key === "priority";
+
+  useEffect(() => {
+    if (!drag) return;
+    function onMove(e: globalThis.PointerEvent) {
+      const row = document.elementFromPoint(e.clientX, e.clientY)?.closest<HTMLElement>("tr[data-id]");
+      if (!row) return;
+      const rect = row.getBoundingClientRect();
+      const half = e.clientY < rect.top + rect.height / 2 ? "upper" : "lower";
+      setDrag((d) => d && { ...d, over: { id: Number(row.dataset.id), half } });
+    }
+    function onUp() {
+      if (drag?.over) drop(drag.id, drag.over.id, drag.over.half);
+      setDrag(null);
+    }
+    const cancel = () => setDrag(null);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", cancel);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", cancel);
+    };
+  });
+
+  /** Upper half means "above on screen", which is a lower priority number only in ascending order. */
+  function drop(movedId: number, targetId: number, half: "upper" | "lower") {
+    if (movedId === targetId) return;
+    const before = (half === "upper") === (sort.dir === "asc");
+    const ids = moveProject(projects, movedId, targetId, before ? "before" : "after");
+    const current = sortProjects(projects, "priority", "asc", []).map((p) => p.id);
+    if (ids.some((id, i) => id !== current[i])) onReorder(ids);
+  }
+
+  function startDrag(e: PointerEvent, id: number) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    setDrag({ id, over: null });
+  }
+
+  function rowClass(id: number): string {
+    if (!drag) return "row";
+    if (drag.id === id) return "row row-dragging";
+    if (drag.over?.id === id) return `row drop-${drag.over.half === "upper" ? "above" : "below"}`;
+    return "row";
+  }
 
   function toggleSort(key: SortKey) {
     setSort((s) => ({ key, dir: s.key === key && s.dir === "asc" ? "desc" : "asc" }));
@@ -57,7 +114,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
 
   return (
     <div className="table-wrap">
-      <table className="table">
+      <table className={`table${reorderable ? " table-reorderable" : ""}${drag ? " table-dragging" : ""}`}>
         <colgroup>
           {COLUMNS.map((col) => (
             <col key={col.key} style={{ width: col.width }} />
@@ -68,6 +125,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
             {COLUMNS.map((col) => (
               <th
                 key={col.key}
+                title={col.key === "priority" && reorderable ? "Drag rows to reorder" : undefined}
                 aria-sort={sort.key === col.key ? (sort.dir === "asc" ? "ascending" : "descending") : undefined}
               >
                 <button type="button" className="th-btn" onClick={() => toggleSort(col.key)}>
@@ -92,7 +150,28 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
             const provider = detectProvider(p.repoUrl);
             const ProviderIcon = provider ? PROVIDER_ICONS[provider] : null;
             return (
-              <tr key={p.id} className="row" tabIndex={0} onClick={() => onOpen(p)} onKeyDown={(e) => onRowKey(e, p)}>
+              <tr
+                key={p.id}
+                data-id={p.id}
+                className={rowClass(p.id)}
+                tabIndex={0}
+                onClick={() => onOpen(p)}
+                onKeyDown={(e) => onRowKey(e, p)}
+              >
+                <td className="cell-priority">
+                  {reorderable && (
+                    <button
+                      type="button"
+                      className="grip"
+                      aria-label={`Drag to reorder ${p.name}`}
+                      onPointerDown={(e) => startDrag(e, p.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <GripIcon />
+                    </button>
+                  )}
+                  <span className="priority">{p.priority}</span>
+                </td>
                 <td className="cell-name" title={p.name}>
                   {p.name}
                 </td>

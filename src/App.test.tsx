@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
@@ -70,5 +70,21 @@ describe("App", () => {
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Project name is required");
     expect(screen.getByRole("heading", { name: "Edit Project" })).toBeInTheDocument();
+  });
+
+  it("persists a drag reorder and renumbers rows right away", async () => {
+    vi.mocked(api.reorderProjects).mockReturnValue(new Promise(() => {}));
+    render(<App />);
+    await userEvent.click(await screen.findByRole("button", { name: "#" }));
+    const alphaRow = screen.getByText("Alpha").closest("tr")!;
+    alphaRow.getBoundingClientRect = () => ({ top: 100, height: 50 }) as DOMRect;
+    document.elementFromPoint = () => alphaRow;
+    const betaRow = screen.getByText("Beta").closest("tr")!;
+    fireEvent.pointerDown(within(betaRow).getByRole("button", { name: /drag to reorder/i }), { button: 0 });
+    fireEvent.pointerMove(window, { clientY: 110 });
+    fireEvent.pointerUp(window);
+
+    expect(api.reorderProjects).toHaveBeenCalledWith([2, 1]);
+    expect(within(screen.getByText("Beta").closest("tr")!).getAllByRole("cell")[0]).toHaveTextContent("1");
   });
 });

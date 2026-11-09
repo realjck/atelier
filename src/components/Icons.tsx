@@ -65,6 +65,17 @@ export const SortIcon = (p: IconProps) => (
   </Stroke>
 );
 
+export const GripIcon = (p: IconProps) => (
+  <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor" aria-hidden="true" {...p}>
+    <circle cx="2.5" cy="3" r="1.5" />
+    <circle cx="7.5" cy="3" r="1.5" />
+    <circle cx="2.5" cy="8" r="1.5" />
+    <circle cx="7.5" cy="8" r="1.5" />
+    <circle cx="2.5" cy="13" r="1.5" />
+    <circle cx="7.5" cy="13" r="1.5" />
+  </svg>
+);
+
 export const GridIcon = (p: IconProps) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" {...p}>
     <rect x="1" y="1" width="6" height="6" rx="1.5" />

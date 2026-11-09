@@ -65,6 +65,18 @@ function App() {
     });
   }
 
+  /** Renumbers locally first so the dropped row does not jump back while the save is in flight. */
+  function reorderProjects(ids: number[]) {
+    setProjects((list) => list.map((p) => ({ ...p, priority: ids.indexOf(p.id) + 1 })));
+    run(async () => {
+      try {
+        await api.reorderProjects(ids);
+      } finally {
+        await reload();
+      }
+    });
+  }
+
   function deleteProject() {
     if (!editing || editing === "new") return;
     const id = editing.id;
@@ -103,6 +115,7 @@ function App() {
           onOpen={setEditing}
           onOpenFolder={(path) => run(() => api.openFolder(path))}
           onOpenUrl={(url) => run(() => api.openUrl(url))}
+          onReorder={reorderProjects}
         />
         <DbFolderButton onClick={() => run(api.openDbFolder)} />
       </div>
