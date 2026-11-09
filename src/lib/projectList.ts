@@ -2,7 +2,7 @@ import type { Category, Project, StateId } from "../types";
 import { STATES } from "./states";
 
 export type Filter = "all" | "online" | StateId;
-export type SortKey = "name" | "category" | "created" | "state" | "path" | "repo" | "status";
+export type SortKey = "priority" | "name" | "category" | "created" | "state" | "path" | "repo" | "status";
 export type SortDir = "asc" | "desc";
 
 export function filterProjects(
@@ -49,6 +49,8 @@ const collator = new Intl.Collator("en", { sensitivity: "base", numeric: true })
 
 function sortValue(key: SortKey, categories: Category[]): (p: Project) => string | number | null {
   switch (key) {
+    case "priority":
+      return (p) => p.priority;
     case "name":
       return (p) => p.name;
     case "category":
@@ -64,4 +66,22 @@ function sortValue(key: SortKey, categories: Category[]): (p: Project) => string
     case "status":
       return (p) => (p.prodUrl ? 0 : 1);
   }
+}
+
+/**
+ * Returns every project id in its new priority order after moving `movedId`
+ * just before or after `targetId`. Other projects keep their relative order.
+ */
+export function moveProject(
+  projects: Project[],
+  movedId: number,
+  targetId: number,
+  place: "before" | "after",
+): number[] {
+  const rest = sortProjects(projects, "priority", "asc", [])
+    .map((p) => p.id)
+    .filter((id) => id !== movedId);
+  const index = rest.indexOf(targetId) + (place === "after" ? 1 : 0);
+  rest.splice(index, 0, movedId);
+  return rest;
 }

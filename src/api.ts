@@ -7,6 +7,8 @@ export const api = {
   createProject: (input: ProjectInput) => invoke<Project>("create_project", { input }),
   updateProject: (id: number, input: ProjectInput) => invoke<Project>("update_project", { id, input }),
   deleteProject: (id: number) => invoke<void>("delete_project", { id }),
+  /** `ids` lists every project, highest priority first. */
+  reorderProjects: (ids: number[]) => invoke<void>("reorder_projects", { ids }),
   listCategories: () => invoke<Category[]>("list_categories"),
   saveCategories: (drafts: CategoryDraft[], deleted: number[]) =>
     invoke<Category[]>("save_categories", { drafts, deleted }),

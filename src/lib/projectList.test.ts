@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Category, Project } from "../types";
-import { filterProjects, sortProjects } from "./projectList";
+import { filterProjects, moveProject, sortProjects } from "./projectList";
 
 const categories: Category[] = [
   { id: 1, name: "Pro", color: "#3b82f6" },
@@ -17,6 +17,7 @@ function project(id: number, patch: Partial<Project>): Project {
     localPath: null,
     repoUrl: null,
     prodUrl: null,
+    priority: id,
     ...patch,
   };
 }
@@ -66,5 +67,29 @@ describe("sortProjects", () => {
   });
   it("status puts online first on asc", () => {
     expect(ids(sortProjects(projects, "status", "asc", categories)).slice(0, 2)).toEqual([1, 2]);
+  });
+});
+
+describe("moveProject", () => {
+  // Priorities 1..4 in id order, shuffled to check the input order does not matter.
+  const all = [projects[2], projects[0], projects[3], projects[1]];
+
+  it("moves_before_the_target", () => {
+    expect(moveProject(all, 4, 2, "before")).toEqual([1, 4, 2, 3]);
+  });
+  it("moves_after_the_target", () => {
+    expect(moveProject(all, 1, 3, "after")).toEqual([2, 3, 1, 4]);
+  });
+  it("keeps_hidden_projects_in_their_relative_order", () => {
+    // Dropping 4 just after 1 when 2 and 3 are filtered out.
+    expect(moveProject(all, 4, 1, "after")).toEqual([1, 4, 2, 3]);
+  });
+});
+
+describe("sortProjects by priority", () => {
+  it("sorts_by_priority_both_ways", () => {
+    const shuffled = [projects[2], projects[0], projects[3], projects[1]];
+    expect(ids(sortProjects(shuffled, "priority", "asc", categories))).toEqual([1, 2, 3, 4]);
+    expect(ids(sortProjects(shuffled, "priority", "desc", categories))).toEqual([4, 3, 2, 1]);
   });
 });

@@ -23,6 +23,8 @@ export interface Project {
   localPath: string | null;
   repoUrl: string | null;
   prodUrl: string | null;
+  /** 1-based rank, unique across all projects; changed only by reordering. */
+  priority: number;
 }
 
-export type ProjectInput = Omit<Project, "id">;
+export type ProjectInput = Omit<Project, "id" | "priority">;

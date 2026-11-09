@@ -18,6 +18,7 @@ const existing: Project = {
   localPath: "E:\\projects\\portfolio",
   repoUrl: "https://github.com/me/portfolio",
   prodUrl: "https://example.com",
+  priority: 1,
 };
 
 function setup(project: Project | null = null) {

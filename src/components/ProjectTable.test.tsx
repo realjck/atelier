@@ -15,6 +15,7 @@ const online: Project = {
   localPath: "/projects/portfolio",
   repoUrl: "https://github.com/me/portfolio",
   prodUrl: "https://example.com",
+  priority: 1,
 };
 
 const offline: Project = {
@@ -27,6 +28,7 @@ const offline: Project = {
   localPath: null,
   repoUrl: null,
   prodUrl: null,
+  priority: 2,
 };
 
 function setup(projects: Project[] = [online, offline]) {

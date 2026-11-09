@@ -12,6 +12,7 @@ vi.mock("./api", () => ({
     createProject: vi.fn(),
     updateProject: vi.fn(),
     deleteProject: vi.fn(),
+    reorderProjects: vi.fn(),
     saveCategories: vi.fn(),
     openFolder: vi.fn(),
     openUrl: vi.fn(),
@@ -19,7 +20,7 @@ vi.mock("./api", () => ({
   },
 }));
 
-const base: Omit<Project, "id" | "name"> = {
+const base: Omit<Project, "id" | "name" | "priority"> = {
   categoryId: null,
   created: "2025-04-12",
   state: "draft",
@@ -27,8 +28,8 @@ const base: Omit<Project, "id" | "name"> = {
   repoUrl: null,
   prodUrl: null,
 };
-const alpha: Project = { ...base, id: 1, name: "Alpha" };
-const beta: Project = { ...base, id: 2, name: "Beta" };
+const alpha: Project = { ...base, id: 1, name: "Alpha", priority: 1 };
+const beta: Project = { ...base, id: 2, name: "Beta", priority: 2 };
 
 beforeEach(() => {
   vi.mocked(api.listProjects).mockResolvedValue([alpha, beta]);
