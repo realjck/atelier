@@ -194,7 +194,7 @@ describe("ProjectTable", () => {
     const header = () => screen.getByRole("columnheader", { name: "Name" });
     const chevron = () => header().querySelector("svg")!.dataset.dir;
     expect(header()).not.toHaveAttribute("aria-sort");
-    expect(chevron()).toBeUndefined();
+    expect(header().querySelector("svg")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Name" }));
     expect(header()).toHaveAttribute("aria-sort", "ascending");
     expect(chevron()).toBe("asc");

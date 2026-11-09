@@ -59,12 +59,6 @@ export const ChevronDownIcon = (p: IconProps) => (
   </Stroke>
 );
 
-export const SortIcon = (p: IconProps) => (
-  <Stroke width="12" height="12" {...p}>
-    <path d="m7 9 5-5 5 5M7 15l5 5 5-5" />
-  </Stroke>
-);
-
 /** Single chevron for the sorted column: up for ascending, down for descending. */
 export const SortDirIcon = ({ dir, ...p }: IconProps & { dir: "asc" | "desc" }) => (
   <Stroke width="14" height="14" strokeWidth="2.2" data-dir={dir} {...p}>
