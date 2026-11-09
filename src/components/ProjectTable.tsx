@@ -1,5 +1,5 @@
-import { useEffect, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
-import { sortProjects, type SortDir, type SortKey } from "../lib/projectList";
+import { useEffect, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { dropIndex, sortProjects, type SortDir, type SortKey } from "../lib/projectList";
 import { detectProvider } from "../lib/repo";
 import { stateMeta } from "../lib/states";
 import type { Category, Project } from "../types";
@@ -16,10 +16,14 @@ interface ProjectTableProps {
   onMove: (movedId: number, targetId: number, place: "before" | "after") => void;
 }
 
-/** A row being dragged, and where it would land relative to the hovered row. */
+/** A row being dragged; row positions are measured once, when the press starts. */
 interface Drag {
   id: number;
-  over: { id: number; half: "upper" | "lower" } | null;
+  from: number;
+  startY: number;
+  dy: number;
+  centers: number[];
+  height: number;
 }
 
 /**
@@ -52,50 +56,55 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
   const rows = sortProjects(projects, sort.key, sort.dir, categories);
   const reorderable = sort.key === "priority";
 
+  const to = drag ? dropIndex(drag.centers, drag.from, drag.centers[drag.from] + drag.dy) : -1;
+
   useEffect(() => {
     if (!drag) return;
-    function onMove(e: globalThis.PointerEvent) {
-      const row = document.elementFromPoint(e.clientX, e.clientY)?.closest<HTMLElement>("tr[data-id]");
-      if (!row) return;
-      const rect = row.getBoundingClientRect();
-      const half = e.clientY < rect.top + rect.height / 2 ? "upper" : "lower";
-      setDrag((d) => d && { ...d, over: { id: Number(row.dataset.id), half } });
-    }
-    function onUp() {
-      if (drag?.over) drop(drag.id, drag.over.id, drag.over.half);
+    const onPointerMove = (e: globalThis.PointerEvent) => setDrag((d) => d && { ...d, dy: e.clientY - d.startY });
+    function onPointerUp() {
+      if (drag && to !== drag.from) drop(drag.id, to > drag.from ? "after" : "before");
       setDrag(null);
     }
     const cancel = () => setDrag(null);
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
     window.addEventListener("pointercancel", cancel);
     return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", cancel);
     };
   });
 
-  /** Upper half means "above on screen", which is a lower priority number only in ascending order. */
-  function drop(movedId: number, targetId: number, half: "upper" | "lower") {
-    if (movedId === targetId) return;
-    const before = (half === "upper") === (sort.dir === "asc");
-    const neighbor = rows[rows.findIndex((p) => p.id === targetId) + (half === "upper" ? -1 : 1)];
-    if (neighbor?.id === movedId) return;
-    onMove(movedId, targetId, before ? "before" : "after");
+  /** "Above on screen" means a lower priority number only in ascending order. */
+  function drop(movedId: number, onScreen: "before" | "after") {
+    const before = (onScreen === "before") === (sort.dir === "asc");
+    onMove(movedId, rows[to].id, before ? "before" : "after");
   }
 
-  function startDrag(e: PointerEvent, id: number) {
+  function startDrag(e: PointerEvent<HTMLElement>, id: number) {
     if (e.button !== 0) return;
     e.preventDefault();
-    setDrag({ id, over: null });
+    const tbody = e.currentTarget.closest("tbody")!;
+    const rects = [...tbody.querySelectorAll("tr[data-id]")].map((tr) => tr.getBoundingClientRect());
+    const from = rows.findIndex((p) => p.id === id);
+    setDrag({
+      id,
+      from,
+      startY: e.clientY,
+      dy: 0,
+      centers: rects.map((r) => r.top + r.height / 2),
+      height: rects[from].height,
+    });
   }
 
-  function rowClass(id: number): string {
-    if (!drag) return "row";
-    if (drag.id === id) return "row row-dragging";
-    if (drag.over?.id === id) return `row drop-${drag.over.half === "upper" ? "above" : "below"}`;
-    return "row";
+  /** The dragged row follows the pointer; rows between its origin and target shift by one slot. */
+  function rowStyle(index: number): CSSProperties | undefined {
+    if (!drag) return undefined;
+    if (index === drag.from) return { transform: `translateY(${drag.dy}px)` };
+    if (drag.from < index && index <= to) return { transform: `translateY(${-drag.height}px)` };
+    if (to <= index && index < drag.from) return { transform: `translateY(${drag.height}px)` };
+    return undefined;
   }
 
   function toggleSort(key: SortKey) {
@@ -144,7 +153,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
               </td>
             </tr>
           )}
-          {rows.map((p) => {
+          {rows.map((p, index) => {
             const category = categories.find((c) => c.id === p.categoryId);
             const state = stateMeta(p.state);
             const provider = detectProvider(p.repoUrl);
@@ -153,7 +162,8 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
               <tr
                 key={p.id}
                 data-id={p.id}
-                className={rowClass(p.id)}
+                className={drag?.id === p.id ? "row row-dragging" : "row"}
+                style={rowStyle(index)}
                 tabIndex={0}
                 onClick={() => onOpen(p)}
                 onKeyDown={(e) => onRowKey(e, p)}

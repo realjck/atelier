@@ -45,16 +45,21 @@ const rowNames = () =>
 
 const third: Project = { ...offline, id: 3, name: "Blog", priority: 3 };
 
-/** Drags the handle of `from` and drops it on the upper or lower half of the row of `to`. */
-function drag(from: string, to: string, half: "upper" | "lower") {
-  const target = screen.getByText(to).closest("tr")!;
-  target.getBoundingClientRect = () => ({ top: 100, height: 50 }) as DOMRect;
-  document.elementFromPoint = () => target;
-  const handle = within(screen.getByText(from).closest("tr")!).getByRole("button", { name: /drag to reorder/i });
-  fireEvent.pointerDown(handle, { button: 0, clientX: 5, clientY: 0 });
-  fireEvent.pointerMove(window, { clientX: 5, clientY: half === "upper" ? 110 : 140 });
-  fireEvent.pointerUp(window);
+const ROW_HEIGHT = 50;
+
+/** Gives each body row a 50px slot, presses the handle of `name` and moves the pointer to `y`. */
+function pressAndMove(name: string, y: number) {
+  const rows = screen.getAllByRole("row").slice(1);
+  rows.forEach((row, i) => {
+    row.getBoundingClientRect = () => ({ top: i * ROW_HEIGHT, height: ROW_HEIGHT }) as DOMRect;
+  });
+  const row = screen.getByText(name).closest("tr")!;
+  const center = rows.indexOf(row) * ROW_HEIGHT + ROW_HEIGHT / 2;
+  fireEvent.pointerDown(within(row).getByRole("button", { name: /drag to reorder/i }), { button: 0, clientY: center });
+  fireEvent.pointerMove(window, { clientY: y });
 }
+
+const transformOf = (name: string) => screen.getByText(name).closest("tr")!.style.transform;
 
 describe("ProjectTable", () => {
   it("renders the formatted date, category and state pills", () => {
@@ -105,28 +110,40 @@ describe("ProjectTable", () => {
     expect(screen.getAllByRole("button", { name: /drag to reorder/i })).toHaveLength(2);
   });
 
-  it("drop_on_upper_half_places_before_in_ascending_order", async () => {
+  it("dragged_row_follows_pointer_and_others_make_room", async () => {
+    setup([online, offline, third]);
+    await userEvent.click(screen.getByRole("button", { name: "#" }));
+    pressAndMove("Blog", 60);
+    expect(transformOf("Blog")).toBe("translateY(-65px)");
+    expect(transformOf("Api")).toBe("translateY(50px)");
+    expect(transformOf("Portfolio site redesign")).toBe("");
+  });
+
+  it("drop_above_a_row_places_before_in_ascending_order", async () => {
     const h = setup([online, offline, third]);
     await userEvent.click(screen.getByRole("button", { name: "#" }));
-    drag("Blog", "Api", "upper");
+    pressAndMove("Blog", 60);
+    fireEvent.pointerUp(window);
     expect(h.onMove).toHaveBeenCalledWith(3, 2, "before");
+    expect(transformOf("Api")).toBe("");
     expect(h.onOpen).not.toHaveBeenCalled();
   });
 
-  it("drop_on_upper_half_places_after_in_descending_order", async () => {
+  it("drop_above_a_row_places_after_in_descending_order", async () => {
     const h = setup([online, offline, third]);
     await userEvent.click(screen.getByRole("button", { name: "#" }));
     await userEvent.click(screen.getByRole("button", { name: "#" }));
     expect(rowNames()).toEqual(["Blog", "Api", "Portfolio site redesign"]);
-    drag("Portfolio site redesign", "Api", "upper");
+    pressAndMove("Portfolio site redesign", 60);
+    fireEvent.pointerUp(window);
     expect(h.onMove).toHaveBeenCalledWith(1, 2, "after");
   });
 
   it("dropping_in_place_does_not_reorder", async () => {
     const h = setup([online, offline, third]);
     await userEvent.click(screen.getByRole("button", { name: "#" }));
-    drag("Api", "Api", "lower");
-    drag("Api", "Blog", "upper");
+    pressAndMove("Api", 85);
+    fireEvent.pointerUp(window);
     expect(h.onMove).not.toHaveBeenCalled();
   });
 

@@ -85,3 +85,11 @@ export function moveProject(
   rest.splice(index, 0, movedId);
   return rest;
 }
+
+/**
+ * Index a dragged row would take in a list, given the rows' original vertical
+ * centers, the row's original index and its current center.
+ */
+export function dropIndex(centers: number[], from: number, draggedCenter: number): number {
+  return centers.filter((c, i) => i !== from && c < draggedCenter).length;
+}

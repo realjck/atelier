@@ -311,7 +311,7 @@ button {
 .table th {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 2;
   padding: 0;
   text-align: left;
   font-weight: 400;
@@ -452,19 +452,32 @@ button {
   background: transparent;
 }
 
-.row.row-dragging,
-.row.row-dragging:hover {
+/* Rows slide into place while a row is dragged; no transition once dropped, so nothing animates back. */
+.table-dragging .row {
+  transition: transform 0.16s ease;
+}
+
+.table-dragging .row.row-dragging {
+  position: relative;
+  z-index: 1;
+  transition: none;
+}
+
+.row-dragging td {
   background: var(--surface-2);
-  opacity: 0.55;
+  box-shadow: inset 0 0 0 1px var(--accent-2);
 }
 
-/* Insertion line drawn on the edge where the dragged row will land. */
-.drop-above td {
-  box-shadow: inset 0 2px 0 var(--accent-2);
+.row-dragging td:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
 }
 
-.drop-below td {
-  box-shadow: inset 0 -2px 0 var(--accent-2);
+.row-dragging td:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.table-dragging .row-dragging {
+  filter: drop-shadow(0 10px 24px rgb(0 0 0 / 0.45));
 }
 
 .cell-muted {

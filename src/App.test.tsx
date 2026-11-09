@@ -79,11 +79,11 @@ describe("App", () => {
     render(<App />);
     await userEvent.click(await screen.findByRole("button", { name: "#" }));
     const alphaRow = screen.getByText("Alpha").closest("tr")!;
-    alphaRow.getBoundingClientRect = () => ({ top: 100, height: 50 }) as DOMRect;
-    document.elementFromPoint = () => alphaRow;
     const betaRow = screen.getByText("Beta").closest("tr")!;
-    fireEvent.pointerDown(within(betaRow).getByRole("button", { name: /drag to reorder/i }), { button: 0 });
-    fireEvent.pointerMove(window, { clientY: 110 });
+    alphaRow.getBoundingClientRect = () => ({ top: 0, height: 50 }) as DOMRect;
+    betaRow.getBoundingClientRect = () => ({ top: 50, height: 50 }) as DOMRect;
+    fireEvent.pointerDown(within(betaRow).getByRole("button", { name: /drag to reorder/i }), { button: 0, clientY: 75 });
+    fireEvent.pointerMove(window, { clientY: 10 });
     fireEvent.pointerUp(window);
 
     // Hidden (archived) projects must be part of the new order too.

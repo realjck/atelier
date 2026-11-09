@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Category, Project } from "../types";
-import { filterProjects, moveProject, sortProjects } from "./projectList";
+import { dropIndex, filterProjects, moveProject, sortProjects } from "./projectList";
 
 const categories: Category[] = [
   { id: 1, name: "Pro", color: "#3b82f6" },
@@ -91,5 +91,20 @@ describe("sortProjects by priority", () => {
     const shuffled = [projects[2], projects[0], projects[3], projects[1]];
     expect(ids(sortProjects(shuffled, "priority", "asc", categories))).toEqual([1, 2, 3, 4]);
     expect(ids(sortProjects(shuffled, "priority", "desc", categories))).toEqual([4, 3, 2, 1]);
+  });
+});
+
+describe("dropIndex", () => {
+  const centers = [25, 75, 125, 175];
+  it("stays_in_place_for_small_moves", () => {
+    expect(dropIndex(centers, 1, 90)).toBe(1);
+  });
+  it("moves_up_once_past_a_row_center", () => {
+    expect(dropIndex(centers, 2, 70)).toBe(1);
+    expect(dropIndex(centers, 2, -40)).toBe(0);
+  });
+  it("moves_down_once_past_a_row_center", () => {
+    expect(dropIndex(centers, 0, 80)).toBe(1);
+    expect(dropIndex(centers, 0, 500)).toBe(3);
   });
 });
