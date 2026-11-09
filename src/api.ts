@@ -1,4 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import type { Theme } from "./lib/theme";
 import type { Category, CategoryDraft, Project, ProjectInput } from "./types";
 
 /** Typed wrappers around the Rust commands. Rejections carry the error message as a string. */
@@ -15,4 +17,6 @@ export const api = {
   openFolder: (path: string) => invoke<void>("open_folder", { path }),
   openUrl: (url: string) => invoke<void>("open_url", { url }),
   openDbFolder: () => invoke<void>("open_db_folder"),
+  /** Native title bar and window chrome. */
+  setWindowTheme: (theme: Theme) => getCurrentWindow().setTheme(theme),
 };

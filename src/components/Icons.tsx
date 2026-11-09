@@ -66,6 +66,19 @@ export const SortDirIcon = ({ dir, ...p }: IconProps & { dir: "asc" | "desc" }) 
   </Stroke>
 );
 
+export const SunIcon = (p: IconProps) => (
+  <Stroke width="14" height="14" strokeWidth="2" {...p}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+  </Stroke>
+);
+
+export const MoonIcon = (p: IconProps) => (
+  <Stroke width="14" height="14" strokeWidth="2" {...p}>
+    <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" />
+  </Stroke>
+);
+
 export const GripIcon = (p: IconProps) => (
   <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor" aria-hidden="true" {...p}>
     <circle cx="2.5" cy="3" r="1.5" />

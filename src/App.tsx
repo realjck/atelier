@@ -8,7 +8,9 @@ import { Header } from "./components/Header";
 import { ChevronDownIcon, PencilIcon } from "./components/Icons";
 import { ProjectModal } from "./components/ProjectModal";
 import { ProjectTable } from "./components/ProjectTable";
+import { ThemeSwitch } from "./components/ThemeSwitch";
 import { filterProjects, moveProject, type Filter } from "./lib/projectList";
+import { applyTheme, systemTheme, type Theme } from "./lib/theme";
 import type { Category, CategoryDraft, Project, ProjectInput } from "./types";
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Project | "new" | null>(null);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  /** Starts from the OS preference on every launch; the switch overrides it until the app closes. */
+  const [theme, setTheme] = useState<Theme>(systemTheme);
 
   /** Runs an API call, surfacing any rejection in the error toast. */
   const run = useCallback(async (action: () => Promise<void>) => {
@@ -42,6 +46,11 @@ function App() {
   useEffect(() => {
     reload();
   }, [reload]);
+
+  useEffect(() => {
+    applyTheme(theme);
+    run(() => api.setWindowTheme(theme));
+  }, [theme, run]);
 
   const clearError = useCallback(() => setError(null), []);
   const closeModal = useCallback(() => setEditing(null), []);
@@ -122,6 +131,7 @@ function App() {
           viewKey={`${filter}|${query}`}
           onMove={moveInPriority}
         />
+        <ThemeSwitch theme={theme} onChange={setTheme} />
         <DbFolderButton onClick={() => run(api.openDbFolder)} />
       </div>
       {editing && (

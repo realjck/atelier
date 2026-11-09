@@ -620,6 +620,41 @@ button {
   border-color: var(--border-strong);
 }
 
+/* Theme switch, left of the database folder button and centered on it. */
+.theme-switch {
+  position: fixed;
+  right: 74px;
+  bottom: 26px;
+  width: 54px;
+  height: 30px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.theme-switch:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.theme-knob {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  transition: transform 0.2s ease;
+}
+
+.theme-switch[aria-checked="true"] .theme-knob {
+  transform: translateX(24px);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
 /* Toast */
 .toast {
   position: fixed;

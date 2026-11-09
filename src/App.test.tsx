@@ -17,6 +17,7 @@ vi.mock("./api", () => ({
     openFolder: vi.fn(),
     openUrl: vi.fn(),
     openDbFolder: vi.fn(),
+    setWindowTheme: vi.fn(),
   },
 }));
 
@@ -35,6 +36,7 @@ beforeEach(() => {
   vi.mocked(api.listProjects).mockResolvedValue([alpha, beta]);
   vi.mocked(api.listCategories).mockResolvedValue([]);
   vi.mocked(api.updateProject).mockResolvedValue(alpha);
+  vi.mocked(api.setWindowTheme).mockResolvedValue();
 });
 
 describe("App", () => {
@@ -103,5 +105,16 @@ describe("App", () => {
     wrap.scrollTop = 200;
     await userEvent.type(screen.getByLabelText("Search projects"), "a");
     expect(wrap.scrollTop).toBe(0);
+  });
+
+  it("starts_in_the_os_theme_and_switches_page_and_window_theme", async () => {
+    render(<App />);
+    await screen.findByText("Alpha");
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(api.setWindowTheme).toHaveBeenLastCalledWith("dark");
+
+    await userEvent.click(screen.getByRole("switch", { name: "Light mode" }));
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(api.setWindowTheme).toHaveBeenLastCalledWith("light");
   });
 });
