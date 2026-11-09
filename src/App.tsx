@@ -10,6 +10,7 @@ import { ProjectModal } from "./components/ProjectModal";
 import { ProjectTable } from "./components/ProjectTable";
 import { ThemeSwitch } from "./components/ThemeSwitch";
 import { filterProjects, moveProject, type Filter } from "./lib/projectList";
+import { loadNameEmphasis, saveNameEmphasis } from "./lib/settings";
 import { applyTheme, initialTheme, saveTheme, type Theme } from "./lib/theme";
 import type { Category, CategoryDraft, Project, ProjectInput } from "./types";
 
@@ -23,6 +24,7 @@ function App() {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   /** The last theme chosen with the switch, else the OS preference. */
   const [theme, setTheme] = useState<Theme>(initialTheme);
+  const [emphasis, setEmphasis] = useState(loadNameEmphasis);
 
   /** Runs an API call, surfacing any rejection in the error toast. */
   const run = useCallback(async (action: () => Promise<void>) => {
@@ -55,6 +57,11 @@ function App() {
   const clearError = useCallback(() => setError(null), []);
   const closeModal = useCallback(() => setEditing(null), []);
   const closeCategories = useCallback(() => setCategoriesOpen(false), []);
+
+  function switchEmphasis(on: boolean) {
+    saveNameEmphasis(on);
+    setEmphasis(on);
+  }
 
   function switchTheme(next: Theme) {
     saveTheme(next);
@@ -109,7 +116,13 @@ function App() {
     <>
       {/* Inert while the modal is open so keyboard focus cannot reach rows behind it. */}
       <div className="app" inert={editing !== null}>
-        <Header query={query} onQueryChange={setQuery} onNewProject={() => setEditing("new")} />
+        <Header
+          query={query}
+          onQueryChange={setQuery}
+          onNewProject={() => setEditing("new")}
+          emphasis={emphasis}
+          onEmphasisChange={switchEmphasis}
+        />
         <div className="toolbar">
           <FilterBar value={filter} onChange={setFilter} />
           <button
@@ -133,6 +146,7 @@ function App() {
           onOpen={setEditing}
           onOpenFolder={(path) => run(() => api.openFolder(path))}
           onOpenUrl={(url) => run(() => api.openUrl(url))}
+          emphasis={emphasis}
           viewKey={`${filter}|${query}`}
           onMove={moveInPriority}
         />

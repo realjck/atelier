@@ -136,4 +136,17 @@ describe("App", () => {
     expect(screen.getByText(`v${pkg.version}`)).toBeInTheDocument();
     await screen.findByText("Alpha");
   });
+
+  it("priority_emphasis_can_be_switched_off_and_stays_off", async () => {
+    const { unmount } = render(<App />);
+    const alphaName = await screen.findByText("Alpha");
+    expect(alphaName.style.fontSize).toBe("20px");
+    await userEvent.click(screen.getByRole("switch", { name: "Priority emphasis" }));
+    expect(screen.getByText("Alpha").style.fontSize).toBe("");
+    unmount();
+
+    render(<App />);
+    expect((await screen.findByText("Alpha")).style.fontSize).toBe("");
+    expect(screen.getByRole("switch", { name: "Priority emphasis" })).toHaveAttribute("aria-checked", "false");
+  });
 });

@@ -184,6 +184,81 @@ button {
   min-width: 0;
 }
 
+/* Priority emphasis switch: uniform "AAA" on the left, graded "AAA" on the right. */
+.emphasis-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex: none;
+  width: 104px;
+  height: 40px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.emphasis-switch:hover {
+  border-color: var(--border-strong);
+}
+
+.emphasis-knob {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.emphasis-switch[aria-checked="true"] .emphasis-knob {
+  transform: translateX(100%);
+  background: var(--accent);
+}
+
+.aaa {
+  position: relative;
+  align-self: center;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+}
+
+.aaa-flat {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.aaa-graded span:nth-child(1) {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.aaa-graded span:nth-child(2) {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.aaa-graded span:nth-child(3) {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.emphasis-switch[aria-checked="false"] .aaa-flat,
+.emphasis-switch:hover .aaa {
+  color: var(--text);
+}
+
+.emphasis-switch[aria-checked="true"] .aaa-graded {
+  color: var(--on-accent);
+}
+
 .search {
   display: flex;
   align-items: center;
@@ -451,6 +526,12 @@ button {
 /* Size and weight are set per row from the priority (see nameEmphasis); line height stays fixed. */
 .cell-name {
   line-height: 24px;
+}
+
+/* Uniform names when priority emphasis is switched off. */
+.cell-name-plain {
+  font-size: 16px;
+  font-weight: 500;
 }
 
 /* Priority: first column; becomes the drag handle column when sorted by priority. */

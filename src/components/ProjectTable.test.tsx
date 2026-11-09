@@ -31,9 +31,9 @@ const offline: Project = {
   priority: 2,
 };
 
-function setup(projects: Project[] = [online, offline]) {
+function setup(projects: Project[] = [online, offline], emphasis = true) {
   const handlers = { onOpen: vi.fn(), onOpenFolder: vi.fn(), onOpenUrl: vi.fn(), onMove: vi.fn() };
-  render(<ProjectTable projects={projects} categories={categories} viewKey="all|" {...handlers} />);
+  render(<ProjectTable projects={projects} categories={categories} viewKey="all|" emphasis={emphasis} {...handlers} />);
   return handlers;
 }
 
@@ -206,6 +206,14 @@ describe("ProjectTable", () => {
     setup();
     expect(screen.getByText("Portfolio site redesign")).toHaveStyle({ fontSize: "20px", fontWeight: "700" });
     expect(screen.getByText("Api")).toHaveStyle({ fontSize: "18.9px" });
+  });
+
+  it("names_are_uniform_when_emphasis_is_off", () => {
+    setup([online, offline], false);
+    for (const name of ["Portfolio site redesign", "Api"]) {
+      expect(screen.getByText(name).style.fontSize).toBe("");
+      expect(screen.getByText(name)).toHaveClass("cell-name-plain");
+    }
   });
 
   it("sorting_scrolls_back_to_the_top", async () => {
