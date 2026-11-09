@@ -112,13 +112,14 @@ export function edgeScrollSpeed(pointerY: number, top: number, bottom: number): 
 const EMPHASIS_DECAY = 5;
 
 /**
- * Font size (px) and weight for a project name: priority 1 is 20px bold, fading
- * quickly over the first ranks down to a readable 14px regular.
+ * Font size (px), weight and color for a project name: priority 1 is 20px bold white,
+ * fading quickly over the first ranks down to a readable 14px regular in muted grey.
  */
-export function nameEmphasis(priority: number): { fontSize: number; fontWeight: number } {
+export function nameEmphasis(priority: number): { fontSize: number; fontWeight: number; color: string } {
   const t = Math.exp(-(priority - 1) / EMPHASIS_DECAY);
   return {
     fontSize: Math.round((14 + 6 * t) * 10) / 10,
     fontWeight: Math.round(400 + 300 * t),
+    color: `color-mix(in srgb, var(--text) ${Math.round(100 * t)}%, var(--muted))`,
   };
 }

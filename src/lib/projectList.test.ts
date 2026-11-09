@@ -126,7 +126,11 @@ describe("edgeScrollSpeed", () => {
 
 describe("nameEmphasis", () => {
   it("is_largest_and_boldest_for_priority_one", () => {
-    expect(nameEmphasis(1)).toEqual({ fontSize: 20, fontWeight: 700 });
+    expect(nameEmphasis(1)).toEqual({
+      fontSize: 20,
+      fontWeight: 700,
+      color: "color-mix(in srgb, var(--text) 100%, var(--muted))",
+    });
   });
   it("decreases_with_priority", () => {
     for (let p = 1; p < 30; p++) {
@@ -136,6 +140,10 @@ describe("nameEmphasis", () => {
     expect(nameEmphasis(2).fontSize).toBeLessThan(nameEmphasis(1).fontSize);
   });
   it("never_goes_below_a_readable_floor", () => {
-    expect(nameEmphasis(500)).toEqual({ fontSize: 14, fontWeight: 400 });
+    expect(nameEmphasis(500)).toEqual({
+      fontSize: 14,
+      fontWeight: 400,
+      color: "color-mix(in srgb, var(--text) 0%, var(--muted))",
+    });
   });
 });
