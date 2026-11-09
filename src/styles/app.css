@@ -177,6 +177,19 @@ button {
   letter-spacing: -0.02em;
 }
 
+/* The version sits on the wordmark's baseline. */
+.brand-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.brand-version {
+  color: var(--faint);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
 .header-actions {
   display: flex;
   align-items: center;

@@ -12,7 +12,10 @@ export function Header({ query, onQueryChange, onNewProject }: HeaderProps) {
     <header className="header">
       <div className="brand">
         <Logo size={56} />
-        <h1 className="brand-name">Atelier</h1>
+        <div className="brand-title">
+          <h1 className="brand-name">Atelier</h1>
+          <span className="brand-version">v{__APP_VERSION__}</span>
+        </div>
       </div>
       <div className="header-actions">
         <label className="search">
