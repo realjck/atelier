@@ -463,17 +463,22 @@ button {
   transition: none;
 }
 
+/* Outline drawn per cell edge: an inset ring on every cell would also draw lines between columns. */
 .row-dragging td {
+  --ring: var(--accent-2);
   background: var(--surface-2);
-  box-shadow: inset 0 0 0 1px var(--accent-2);
+  border-bottom-color: transparent;
+  box-shadow: inset 0 1px 0 var(--ring), inset 0 -1px 0 var(--ring);
 }
 
 .row-dragging td:first-child {
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  box-shadow: inset 1px 0 0 var(--ring), inset 0 1px 0 var(--ring), inset 0 -1px 0 var(--ring);
 }
 
 .row-dragging td:last-child {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  box-shadow: inset -1px 0 0 var(--ring), inset 0 1px 0 var(--ring), inset 0 -1px 0 var(--ring);
 }
 
 .table-dragging .row-dragging {
