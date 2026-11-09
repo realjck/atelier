@@ -159,7 +159,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
                 onKeyDown={(e) => onRowKey(e, p)}
               >
                 <td className="cell-priority">
-                  {reorderable && (
+                  {reorderable ? (
                     <button
                       type="button"
                       className="grip"
@@ -168,9 +168,11 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
                       onClick={(e) => e.stopPropagation()}
                     >
                       <GripIcon />
+                      <span className="priority">{p.priority}</span>
                     </button>
+                  ) : (
+                    <span className="priority">{p.priority}</span>
                   )}
-                  <span className="priority">{p.priority}</span>
                 </td>
                 <td className="cell-name" title={p.name}>
                   {p.name}

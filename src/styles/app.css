@@ -399,7 +399,7 @@ button {
 }
 
 .table-reorderable .cell-priority {
-  padding-left: 8px !important;
+  padding-left: 14px !important;
   color: var(--accent-2);
 }
 
@@ -410,27 +410,34 @@ button {
 .grip {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 32px;
-  margin-right: 6px;
-  vertical-align: middle;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px 0 8px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
-  color: var(--faint);
+  color: inherit;
+  font: inherit;
   cursor: grab;
   touch-action: none;
-  transition: color 0.12s, background 0.12s;
+  transition: background 0.12s;
 }
 
-.row:hover .grip,
-.grip:focus-visible {
+.grip svg {
+  color: var(--faint);
+  transition: color 0.12s;
+}
+
+.row:hover .grip svg,
+.grip:focus-visible svg {
   color: var(--muted);
 }
 
 .grip:hover {
   background: var(--border);
+}
+
+.grip:hover svg {
   color: var(--text);
 }
 
