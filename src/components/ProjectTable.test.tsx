@@ -119,6 +119,28 @@ describe("ProjectTable", () => {
     expect(transformOf("Portfolio site redesign")).toBe("");
   });
 
+  it("dragged_row_stays_under_the_pointer_when_the_list_scrolls", async () => {
+    const h = setup([online, offline, third]);
+    await userEvent.click(screen.getByRole("button", { name: "#" }));
+    pressAndMove("Portfolio site redesign", 25);
+    const wrap = screen.getByRole("table").parentElement!;
+    wrap.scrollTop = 110;
+    fireEvent.scroll(wrap);
+    // 110px of scroll, clamped to the last row's slot.
+    expect(transformOf("Portfolio site redesign")).toBe("translateY(100px)");
+    expect(transformOf("Api")).toBe("translateY(-50px)");
+    expect(transformOf("Blog")).toBe("translateY(-50px)");
+    fireEvent.pointerUp(window);
+    expect(h.onMove).toHaveBeenCalledWith(1, 3, "after");
+  });
+
+  it("dragged_row_stays_within_the_list", async () => {
+    setup([online, offline, third]);
+    await userEvent.click(screen.getByRole("button", { name: "#" }));
+    pressAndMove("Api", 900);
+    expect(transformOf("Api")).toBe("translateY(50px)");
+  });
+
   it("drop_above_a_row_places_before_in_ascending_order", async () => {
     const h = setup([online, offline, third]);
     await userEvent.click(screen.getByRole("button", { name: "#" }));

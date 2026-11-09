@@ -1,5 +1,5 @@
-import { useEffect, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
-import { dropIndex, sortProjects, type SortDir, type SortKey } from "../lib/projectList";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { dropIndex, edgeScrollSpeed, sortProjects, type SortDir, type SortKey } from "../lib/projectList";
 import { detectProvider } from "../lib/repo";
 import { stateMeta } from "../lib/states";
 import type { Category, Project } from "../types";
@@ -16,12 +16,17 @@ interface ProjectTableProps {
   onMove: (movedId: number, targetId: number, place: "before" | "after") => void;
 }
 
-/** A row being dragged; row positions are measured once, when the press starts. */
+/**
+ * A row being dragged. Row centers are measured once, when the press starts;
+ * scrolling since then is added back so they stay valid in list coordinates.
+ */
 interface Drag {
   id: number;
   from: number;
   startY: number;
-  dy: number;
+  pointerY: number;
+  startScroll: number;
+  scroll: number;
   centers: number[];
   height: number;
 }
@@ -48,7 +53,12 @@ export function formatDate(isoDate: string): string {
   return dateFormat.format(new Date(y, m - 1, d));
 }
 
-const PROVIDER_ICONS = { github: GithubIcon, gitlab: GitlabIcon, git: GitIcon };
+/** Limits an offset from `origin` so that origin + offset stays within [min, max]. */
+function clamp(offset: number, min: number, max: number, origin: number): number {
+  return Math.min(Math.max(offset, min - origin), max - origin);
+}
+
+const PROVIDER_ICONS ={ github: GithubIcon, gitlab: GitlabIcon, git: GitIcon };
 
 export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpenUrl, onMove }: ProjectTableProps) {
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "created", dir: "desc" });
@@ -56,25 +66,56 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
   const rows = sortProjects(projects, sort.key, sort.dir, categories);
   const reorderable = sort.key === "priority";
 
-  const to = drag ? dropIndex(drag.centers, drag.from, drag.centers[drag.from] + drag.dy) : -1;
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const pointerY = useRef(0);
+  const dragging = drag !== null;
+
+  const offset = drag ? drag.pointerY - drag.startY + drag.scroll - drag.startScroll : 0;
+  const to = drag ? dropIndex(drag.centers, drag.from, drag.centers[drag.from] + offset) : -1;
+  /** The dragged row is kept between the first and last slots so it cannot stretch the list. */
+  const dy = drag ? clamp(offset, drag.centers[0], drag.centers[drag.centers.length - 1], drag.centers[drag.from]) : 0;
 
   useEffect(() => {
     if (!drag) return;
-    const onPointerMove = (e: globalThis.PointerEvent) => setDrag((d) => d && { ...d, dy: e.clientY - d.startY });
+    function onPointerMove(e: globalThis.PointerEvent) {
+      pointerY.current = e.clientY;
+      setDrag((d) => d && { ...d, pointerY: e.clientY });
+    }
     function onPointerUp() {
       if (drag && to !== drag.from) drop(drag.id, to > drag.from ? "after" : "before");
       setDrag(null);
     }
     const cancel = () => setDrag(null);
+    const wrap = wrapRef.current!;
+    const onScroll = () => setDrag((d) => d && { ...d, scroll: wrap.scrollTop });
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
     window.addEventListener("pointercancel", cancel);
+    wrap.addEventListener("scroll", onScroll);
     return () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", cancel);
+      wrap.removeEventListener("scroll", onScroll);
     };
   });
+
+  /** Auto-scrolls while the pointer is near the list's top (below the sticky header) or bottom edge. */
+  useEffect(() => {
+    if (!dragging) return;
+    const wrap = wrapRef.current!;
+    const header = wrap.querySelector("thead")!;
+    let frame = requestAnimationFrame(function step() {
+      const speed = edgeScrollSpeed(
+        pointerY.current,
+        header.getBoundingClientRect().bottom,
+        wrap.getBoundingClientRect().bottom,
+      );
+      if (speed) wrap.scrollTop += speed;
+      frame = requestAnimationFrame(step);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [dragging]);
 
   /** "Above on screen" means a lower priority number only in ascending order. */
   function drop(movedId: number, onScreen: "before" | "after") {
@@ -88,11 +129,15 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
     const tbody = e.currentTarget.closest("tbody")!;
     const rects = [...tbody.querySelectorAll("tr[data-id]")].map((tr) => tr.getBoundingClientRect());
     const from = rows.findIndex((p) => p.id === id);
+    const scroll = wrapRef.current!.scrollTop;
+    pointerY.current = e.clientY;
     setDrag({
       id,
       from,
       startY: e.clientY,
-      dy: 0,
+      pointerY: e.clientY,
+      startScroll: scroll,
+      scroll,
       centers: rects.map((r) => r.top + r.height / 2),
       height: rects[from].height,
     });
@@ -101,7 +146,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
   /** The dragged row follows the pointer; rows between its origin and target shift by one slot. */
   function rowStyle(index: number): CSSProperties | undefined {
     if (!drag) return undefined;
-    if (index === drag.from) return { transform: `translateY(${drag.dy}px)` };
+    if (index === drag.from) return { transform: `translateY(${dy}px)` };
     if (drag.from < index && index <= to) return { transform: `translateY(${-drag.height}px)` };
     if (to <= index && index < drag.from) return { transform: `translateY(${drag.height}px)` };
     return undefined;
@@ -122,7 +167,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
   }
 
   return (
-    <div className="table-wrap">
+    <div className="table-wrap" ref={wrapRef}>
       <table className={`table${reorderable ? " table-reorderable" : ""}${drag ? " table-dragging" : ""}`}>
         <colgroup>
           {COLUMNS.map((col) => (

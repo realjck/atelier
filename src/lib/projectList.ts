@@ -93,3 +93,17 @@ export function moveProject(
 export function dropIndex(centers: number[], from: number, draggedCenter: number): number {
   return centers.filter((c, i) => i !== from && c < draggedCenter).length;
 }
+
+const EDGE = 56;
+const MAX_SPEED = 18;
+
+/**
+ * Pixels per frame to auto-scroll a list while dragging: negative near the top edge,
+ * positive near the bottom, growing as the pointer nears or passes the edge.
+ */
+export function edgeScrollSpeed(pointerY: number, top: number, bottom: number): number {
+  const ramp = (depth: number) => Math.round(MAX_SPEED * Math.min(1, depth / EDGE));
+  if (pointerY < top + EDGE) return -ramp(top + EDGE - pointerY);
+  if (pointerY > bottom - EDGE) return ramp(pointerY - (bottom - EDGE));
+  return 0;
+}

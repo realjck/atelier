@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Category, Project } from "../types";
-import { dropIndex, filterProjects, moveProject, sortProjects } from "./projectList";
+import { dropIndex, edgeScrollSpeed, filterProjects, moveProject, sortProjects } from "./projectList";
 
 const categories: Category[] = [
   { id: 1, name: "Pro", color: "#3b82f6" },
@@ -106,5 +106,20 @@ describe("dropIndex", () => {
   it("moves_down_once_past_a_row_center", () => {
     expect(dropIndex(centers, 0, 80)).toBe(1);
     expect(dropIndex(centers, 0, 500)).toBe(3);
+  });
+});
+
+describe("edgeScrollSpeed", () => {
+  // Visible list area from y=100 to y=600.
+  it("is_zero_away_from_the_edges", () => {
+    expect(edgeScrollSpeed(350, 100, 600)).toBe(0);
+  });
+  it("scrolls_up_near_the_top_and_down_near_the_bottom", () => {
+    expect(edgeScrollSpeed(110, 100, 600)).toBeLessThan(0);
+    expect(edgeScrollSpeed(590, 100, 600)).toBeGreaterThan(0);
+  });
+  it("is_faster_closer_to_the_edge_and_capped_beyond_it", () => {
+    expect(edgeScrollSpeed(590, 100, 600)).toBeGreaterThan(edgeScrollSpeed(570, 100, 600));
+    expect(edgeScrollSpeed(700, 100, 600)).toBe(edgeScrollSpeed(600, 100, 600));
   });
 });
