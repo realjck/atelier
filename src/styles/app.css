@@ -235,6 +235,14 @@ button {
   border-radius: var(--radius-sm);
   font-size: 13px;
   white-space: nowrap;
+  color: var(--pill);
+  background: color-mix(in srgb, var(--pill) 14%, transparent);
+}
+
+/* Light hues (yellow, green) are unreadable as text on white: darken the text, keep the hue. */
+:root[data-theme="light"] .pill {
+  color: color-mix(in srgb, var(--pill) 62%, #000);
+  background: color-mix(in srgb, var(--pill) 16%, transparent);
 }
 
 .pill-label {

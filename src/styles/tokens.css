@@ -37,3 +37,38 @@
   --shadow-pop: 0 18px 50px rgb(0 0 0 / 0.45);
   --glow: 0 6px 24px rgb(91 61 245 / 0.45);
 }
+
+:root[data-theme="light"] {
+  --bg: #f6f5fb;
+  --surface: #ffffff;
+  --surface-2: #f0eef8;
+  --border: #e4e1f0;
+  --border-strong: #cfcae3;
+  --text: #1c1930;
+  --muted: #615c80;
+  --faint: #918caf;
+  --accent: #5b3df5;
+  /* Darker than in dark mode so accent text and lines stay readable on white. */
+  --accent-2: #6544f0;
+  --danger: #e0436a;
+  --online: #16a34a;
+  --offline: #918caf;
+
+  --field: #f8f7fc;
+  --surface-glass: rgb(255 255 255 / 0.82);
+  --on-accent: #fff;
+  --accent-hover: #4a2de4;
+  --accent-border: rgb(91 61 245 / 0.35);
+  --danger-hover: #c93259;
+  --toast-bg: #fff0f3;
+  --toast-border: rgb(224 67 106 / 0.35);
+  --toast-text: #8a1c3a;
+  --backdrop: rgb(28 25 48 / 0.35);
+  --swatch-ring: #1c1930;
+  --bg-glow-1: rgb(91 61 245 / 0.08);
+  --bg-glow-2: rgb(91 61 245 / 0.06);
+  --shadow-pop: 0 18px 50px rgb(28 25 48 / 0.18);
+  --glow: 0 6px 24px rgb(91 61 245 / 0.3);
+  --shadow-lift: 0 10px 24px rgb(28 25 48 / 0.18);
+  color-scheme: light;
+}
