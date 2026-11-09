@@ -246,7 +246,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
                   <div className="cell-box">{category && <Pill color={category.color} label={category.name} />}</div>
                 </td>
                 <td className="cell-muted">{formatDate(p.created)}</td>
-                <td title={state.label}>
+                <td className="cell-state" title={state.label}>
                   <span className="dot" style={{ background: state.color }} />
                   <span className="state-label">{state.label}</span>
                 </td>

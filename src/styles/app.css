@@ -317,7 +317,7 @@ button {
   border-collapse: collapse;
 }
 
-/* Fixed column widths; Name and Path split what is left (equally, or 60/40 in narrow windows).
+/* Fixed column widths; Name and Path split what is left (equally, or 65/35 in narrow windows).
    Priority fits a 3-digit number. */
 .col-priority {
   width: 96px;
@@ -340,13 +340,13 @@ button {
 
 /* Narrow windows: tighten fixed columns so Name and Path keep a usable width. */
 @media (max-width: 1180px) {
-  /* Percentages beyond the space left are scaled down by Chromium, so this splits it 60/40. */
+  /* Percentages beyond the space left are scaled down by Chromium, so this splits it 65/35. */
   .col-name {
-    width: 60%;
+    width: 65%;
   }
 
   .col-path {
-    width: 40%;
+    width: 35%;
   }
 
   .col-category {
@@ -355,8 +355,17 @@ button {
   .col-created {
     width: 120px;
   }
+  /* Just fits "In Progress" (about 75px of text) after the dot. */
   .col-state {
-    width: 126px;
+    width: 108px;
+  }
+
+  .cell-state {
+    padding-right: 3px !important;
+  }
+
+  .cell-state .state-label {
+    margin-left: 7px;
   }
   .col-repo {
     width: 64px;
