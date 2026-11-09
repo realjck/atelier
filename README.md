@@ -14,6 +14,9 @@ Built with Tauri 2 (Rust + SQLite) and React + TypeScript.
   production URL is shown as Online.
 - **One-click access**: open the folder in File Explorer, the repository (GitHub, GitLab or
   other) or the live site in the browser.
+- **Priority**: every project has a unique rank, new projects start at #1. Sort by the `#`
+  column to reorder by drag and drop; the list auto-scrolls near its edges. Names are
+  larger, bolder and brighter the higher their priority.
 - **Filters, search and sorting**. Archived projects are hidden unless the Archived filter
   is selected.
 - **Categories** with colors, managed on the fly from the Manage Categories panel.
@@ -26,7 +29,7 @@ Requires Node.js 22+ and Rust stable (see [Tauri prerequisites](https://tauri.ap
 
 ```sh
 npm install
-npm run tauri dev     # run the app (uses the same database as the installed app)
+npm run tauri dev     # run the app on atelier-dev.db, a copy of atelier.db made on first launch
 npm test              # UI tests
 npm run lint          # type check
 cargo test --manifest-path src-tauri/Cargo.toml   # data layer tests
