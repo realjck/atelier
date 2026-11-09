@@ -117,4 +117,16 @@ describe("App", () => {
     expect(document.documentElement.dataset.theme).toBe("light");
     expect(api.setWindowTheme).toHaveBeenLastCalledWith("light");
   });
+
+  it("remembers_the_switched_theme_for_the_next_launch", async () => {
+    const { unmount } = render(<App />);
+    await screen.findByText("Alpha");
+    await userEvent.click(screen.getByRole("switch", { name: "Light mode" }));
+    unmount();
+
+    render(<App />);
+    await screen.findByText("Alpha");
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(screen.getByRole("switch", { name: "Light mode" })).toHaveAttribute("aria-checked", "true");
+  });
 });

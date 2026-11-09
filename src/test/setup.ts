@@ -3,7 +3,11 @@ import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
 
 // Testing Library only auto-cleans when test globals are enabled.
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  // The saved theme would otherwise leak between tests.
+  localStorage.clear();
+});
 
 // jsdom has no matchMedia; report no OS preference, which means the dark theme.
 window.matchMedia = vi.fn((query: string) => ({ matches: false, media: query }) as MediaQueryList);
