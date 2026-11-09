@@ -3,7 +3,7 @@
 A desktop tool for keeping track of personal projects: where each one lives on disk, where its
 repository is, and whether it is online, all one click away.
 
-![Atelier](docs/screenshot.png)
+![Atelier](docs/screenshot.jpg)
 
 Built with Tauri 2 (Rust + SQLite) and React + TypeScript.
 
