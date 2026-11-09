@@ -184,7 +184,7 @@ button {
   min-width: 0;
 }
 
-/* Priority emphasis switch: uniform "AAA" on the left, graded "AAA" on the right. */
+/* Priority emphasis switch: uniform "ABC" on the left, graded "ABC" on the right. */
 .emphasis-switch {
   position: relative;
   display: grid;
@@ -219,7 +219,7 @@ button {
   background: var(--accent);
 }
 
-.aaa {
+.abc {
   position: relative;
   align-self: center;
   display: flex;
@@ -230,32 +230,32 @@ button {
   transition: color 0.2s ease;
 }
 
-.aaa-flat {
+.abc-flat {
   font-size: 13px;
   font-weight: 500;
 }
 
-.aaa-graded span:nth-child(1) {
+.abc-graded span:nth-child(1) {
   font-size: 17px;
   font-weight: 700;
 }
 
-.aaa-graded span:nth-child(2) {
+.abc-graded span:nth-child(2) {
   font-size: 13px;
   font-weight: 600;
 }
 
-.aaa-graded span:nth-child(3) {
+.abc-graded span:nth-child(3) {
   font-size: 10px;
   font-weight: 500;
 }
 
-.emphasis-switch[aria-checked="false"] .aaa-flat,
-.emphasis-switch:hover .aaa {
+.emphasis-switch[aria-checked="false"] .abc-flat,
+.emphasis-switch:hover .abc {
   color: var(--text);
 }
 
-.emphasis-switch[aria-checked="true"] .aaa-graded {
+.emphasis-switch[aria-checked="true"] .abc-graded {
   color: var(--on-accent);
 }
 

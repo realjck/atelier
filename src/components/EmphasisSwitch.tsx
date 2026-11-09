@@ -1,5 +1,5 @@
 /**
- * Toggles name styling by priority. Left: uniform "AAA" (off); right: "AAA"
+ * Toggles name styling by priority. Left: uniform "ABC" (off); right: "ABC"
  * from large to small (on). The knob sits behind the active side.
  */
 export function EmphasisSwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
@@ -14,13 +14,13 @@ export function EmphasisSwitch({ on, onChange }: { on: boolean; onChange: (on: b
       onClick={() => onChange(!on)}
     >
       <span className="emphasis-knob" aria-hidden="true" />
-      <span className="aaa aaa-flat" aria-hidden="true">
-        AAA
+      <span className="abc abc-flat" aria-hidden="true">
+        ABC
       </span>
-      <span className="aaa aaa-graded" aria-hidden="true">
+      <span className="abc abc-graded" aria-hidden="true">
         <span>A</span>
-        <span>A</span>
-        <span>A</span>
+        <span>B</span>
+        <span>C</span>
       </span>
     </button>
   );
