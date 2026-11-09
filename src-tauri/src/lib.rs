@@ -55,6 +55,7 @@ pub fn run() {
             commands::create_project,
             commands::update_project,
             commands::delete_project,
+            commands::reorder_projects,
             commands::list_categories,
             commands::save_categories,
             commands::open_folder,

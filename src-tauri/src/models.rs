@@ -68,6 +68,8 @@ pub struct Project {
     pub local_path: Option<String>,
     pub repo_url: Option<String>,
     pub prod_url: Option<String>,
+    /// 1-based rank, unique and contiguous across all projects; changed only by reordering.
+    pub priority: i64,
 }
 
 /// Fields of a project as submitted by the UI (no id).

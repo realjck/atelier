@@ -1,24 +1,30 @@
+use std::collections::HashSet;
+
 use chrono::NaiveDate;
-use rusqlite::{Connection, Row, params};
+use rusqlite::{Connection, OptionalExtension, Row, params};
 
 use crate::error::{AppError, AppResult};
 use crate::models::{Project, ProjectInput};
 
-const COLUMNS: &str = "id, name, category_id, created, state, local_path, repo_url, prod_url";
+const COLUMNS: &str =
+    "id, name, category_id, created, state, local_path, repo_url, prod_url, priority";
 
-/// All projects, newest first.
+/// All projects, by priority.
 pub fn list(conn: &Connection) -> AppResult<Vec<Project>> {
-    let sql = format!("SELECT {COLUMNS} FROM projects ORDER BY created DESC, id DESC");
+    let sql = format!("SELECT {COLUMNS} FROM projects ORDER BY priority");
     let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map([], from_row)?;
     Ok(rows.collect::<Result<_, _>>()?)
 }
 
+/// Inserts the project at priority 1, shifting every other project down one rank.
 pub fn create(conn: &Connection, input: &ProjectInput) -> AppResult<Project> {
     let p = clean(input)?;
-    conn.execute(
-        "INSERT INTO projects (name, category_id, created, state, local_path, repo_url, prod_url)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+    let tx = conn.unchecked_transaction()?;
+    tx.execute("UPDATE projects SET priority = priority + 1", [])?;
+    tx.execute(
+        "INSERT INTO projects (name, category_id, created, state, local_path, repo_url, prod_url, priority)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 1)",
         params![
             p.name,
             p.category_id,
@@ -29,7 +35,9 @@ pub fn create(conn: &Connection, input: &ProjectInput) -> AppResult<Project> {
             p.prod_url
         ],
     )?;
-    get(conn, conn.last_insert_rowid())
+    let id = tx.last_insert_rowid();
+    tx.commit()?;
+    get(conn, id)
 }
 
 pub fn update(conn: &Connection, id: i64, input: &ProjectInput) -> AppResult<Project> {
@@ -54,10 +62,44 @@ pub fn update(conn: &Connection, id: i64, input: &ProjectInput) -> AppResult<Pro
     get(conn, id)
 }
 
+/// Deletes the project and moves the ones ranked below it up, keeping priorities contiguous.
 pub fn delete(conn: &Connection, id: i64) -> AppResult<()> {
-    if conn.execute("DELETE FROM projects WHERE id = ?1", [id])? == 0 {
-        return Err(not_found(id));
+    let priority: i64 = conn
+        .query_row("SELECT priority FROM projects WHERE id = ?1", [id], |r| {
+            r.get(0)
+        })
+        .optional()?
+        .ok_or_else(|| not_found(id))?;
+    let tx = conn.unchecked_transaction()?;
+    tx.execute("DELETE FROM projects WHERE id = ?1", [id])?;
+    tx.execute(
+        "UPDATE projects SET priority = priority - 1 WHERE priority > ?1",
+        [priority],
+    )?;
+    tx.commit()?;
+    Ok(())
+}
+
+/// Sets priorities from `ids` (first = priority 1), which must list every project exactly once.
+pub fn reorder(conn: &mut Connection, ids: &[i64]) -> AppResult<()> {
+    let tx = conn.transaction()?;
+    let existing: HashSet<i64> = tx
+        .prepare("SELECT id FROM projects")?
+        .query_map([], |r| r.get(0))?
+        .collect::<Result<_, _>>()?;
+    let given: HashSet<i64> = ids.iter().copied().collect();
+    if given.len() != ids.len() || given != existing {
+        return Err(AppError::Validation(
+            "Reorder must list every project exactly once".into(),
+        ));
     }
+    for (index, id) in ids.iter().enumerate() {
+        tx.execute(
+            "UPDATE projects SET priority = ?1 WHERE id = ?2",
+            params![index as i64 + 1, id],
+        )?;
+    }
+    tx.commit()?;
     Ok(())
 }
 
@@ -80,6 +122,7 @@ fn from_row(r: &Row) -> rusqlite::Result<Project> {
         local_path: r.get(5)?,
         repo_url: r.get(6)?,
         prod_url: r.get(7)?,
+        priority: r.get(8)?,
     })
 }
 
@@ -224,13 +267,81 @@ mod tests {
     }
 
     #[test]
-    fn list_orders_newest_first() {
+    fn list_orders_by_priority() {
         let conn = db::open_in_memory().unwrap();
-        create(&conn, &input("Old", "2025-03-28")).unwrap();
-        create(&conn, &input("New", "2025-04-12")).unwrap();
-        create(&conn, &input("Mid", "2025-04-05")).unwrap();
+        create(&conn, &input("First created", "2025-04-12")).unwrap();
+        create(&conn, &input("Last created", "2025-03-28")).unwrap();
+        assert_eq!(names(&conn), ["Last created", "First created"]);
+    }
 
-        let names: Vec<String> = list(&conn).unwrap().into_iter().map(|p| p.name).collect();
-        assert_eq!(names, ["New", "Mid", "Old"]);
+    fn names(conn: &Connection) -> Vec<String> {
+        list(conn).unwrap().into_iter().map(|p| p.name).collect()
+    }
+
+    fn priorities(conn: &Connection) -> Vec<i64> {
+        list(conn)
+            .unwrap()
+            .into_iter()
+            .map(|p| p.priority)
+            .collect()
+    }
+
+    #[test]
+    fn new_project_takes_priority_one_and_shifts_others() {
+        let conn = db::open_in_memory().unwrap();
+        create(&conn, &input("A", "2025-04-12")).unwrap();
+        let b = create(&conn, &input("B", "2025-01-01")).unwrap();
+
+        assert_eq!(b.priority, 1);
+        assert_eq!(names(&conn), ["B", "A"]);
+        assert_eq!(priorities(&conn), [1, 2]);
+    }
+
+    #[test]
+    fn delete_closes_the_priority_gap() {
+        let conn = db::open_in_memory().unwrap();
+        create(&conn, &input("A", "2025-04-12")).unwrap();
+        let b = create(&conn, &input("B", "2025-04-12")).unwrap();
+        create(&conn, &input("C", "2025-04-12")).unwrap();
+
+        delete(&conn, b.id).unwrap();
+        assert_eq!(names(&conn), ["C", "A"]);
+        assert_eq!(priorities(&conn), [1, 2]);
+    }
+
+    #[test]
+    fn update_keeps_priority() {
+        let conn = db::open_in_memory().unwrap();
+        let a = create(&conn, &input("A", "2025-04-12")).unwrap();
+        create(&conn, &input("B", "2025-04-12")).unwrap();
+        let updated = update(&conn, a.id, &input("A2", "2025-04-12")).unwrap();
+        assert_eq!(updated.priority, 2);
+    }
+
+    #[test]
+    fn reorder_rewrites_priorities_in_given_order() {
+        let mut conn = db::open_in_memory().unwrap();
+        let a = create(&conn, &input("A", "2025-04-12")).unwrap();
+        let b = create(&conn, &input("B", "2025-04-12")).unwrap();
+        let c = create(&conn, &input("C", "2025-04-12")).unwrap();
+
+        reorder(&mut conn, &[a.id, c.id, b.id]).unwrap();
+        assert_eq!(names(&conn), ["A", "C", "B"]);
+        assert_eq!(priorities(&conn), [1, 2, 3]);
+    }
+
+    #[test]
+    fn reorder_rejects_ids_that_are_not_exactly_all_projects() {
+        let mut conn = db::open_in_memory().unwrap();
+        let a = create(&conn, &input("A", "2025-04-12")).unwrap();
+        let b = create(&conn, &input("B", "2025-04-12")).unwrap();
+
+        for bad in [vec![a.id], vec![a.id, a.id], vec![a.id, b.id, 999]] {
+            assert!(matches!(
+                reorder(&mut conn, &bad),
+                Err(AppError::Validation(_))
+            ));
+        }
+        assert_eq!(names(&conn), ["B", "A"]);
     }
 }

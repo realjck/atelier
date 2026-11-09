@@ -48,6 +48,11 @@ pub fn delete_project(state: St, id: i64) -> AppResult<()> {
 }
 
 #[tauri::command]
+pub fn reorder_projects(state: St, ids: Vec<i64>) -> AppResult<()> {
+    projects::reorder(&mut state.conn(), &ids)
+}
+
+#[tauri::command]
 pub fn list_categories(state: St) -> AppResult<Vec<Category>> {
     categories::list(&state.conn())
 }
