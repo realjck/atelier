@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import pkg from "../../package.json";
 import { Header } from "./Header";
 
 describe("Header", () => {
@@ -20,10 +19,5 @@ describe("Header", () => {
     expect(onQueryChange).toHaveBeenCalledWith("a");
     await userEvent.click(screen.getByRole("button", { name: /new project/i }));
     expect(onNewProject).toHaveBeenCalled();
-  });
-
-  it("shows_the_release_version_next_to_the_wordmark", () => {
-    render(<Header query="" onQueryChange={() => {}} onNewProject={() => {}} />);
-    expect(screen.getByText(`v${pkg.version}`)).toBeInTheDocument();
   });
 });

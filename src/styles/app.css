@@ -177,19 +177,6 @@ button {
   letter-spacing: -0.02em;
 }
 
-/* The version sits on the wordmark's baseline. */
-.brand-title {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.brand-version {
-  color: var(--faint);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-
 .header-actions {
   display: flex;
   align-items: center;
@@ -651,6 +638,17 @@ button {
 .db-btn:hover {
   color: var(--text);
   border-color: var(--border-strong);
+}
+
+/* Release version, bottom-left, on the same line as the bottom-right buttons (42px tall). */
+.app-version {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  line-height: 42px;
+  color: var(--faint);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Theme switch, left of the database folder button and centered on it. */

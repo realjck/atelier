@@ -136,6 +136,7 @@ function App() {
           viewKey={`${filter}|${query}`}
           onMove={moveInPriority}
         />
+        <span className="app-version">v{__APP_VERSION__}</span>
         <ThemeSwitch theme={theme} onChange={switchTheme} />
         <DbFolderButton onClick={() => run(api.openDbFolder)} />
       </div>

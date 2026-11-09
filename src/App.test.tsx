@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import pkg from "../package.json";
 import App from "./App";
 import { api } from "./api";
 import type { Project } from "./types";
@@ -128,5 +129,11 @@ describe("App", () => {
     await screen.findByText("Alpha");
     expect(document.documentElement.dataset.theme).toBe("light");
     expect(screen.getByRole("switch", { name: "Light mode" })).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("shows_the_release_version", async () => {
+    render(<App />);
+    expect(screen.getByText(`v${pkg.version}`)).toBeInTheDocument();
+    await screen.findByText("Alpha");
   });
 });
