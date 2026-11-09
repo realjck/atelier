@@ -16,7 +16,8 @@ Built with Tauri 2 (Rust + SQLite) and React + TypeScript.
   other) or the live site in the browser.
 - **Priority**: every project has a unique rank, new projects start at #1. Sort by the `#`
   column to reorder by drag and drop; the list auto-scrolls near its edges. Names are
-  larger, bolder and brighter the higher their priority.
+  larger, bolder and brighter the higher their priority; the ABC switch next to the search
+  turns this off.
 - **Filters, search and sorting**. Archived projects are hidden unless the Archived filter
   is selected.
 - **Categories** with colors, managed on the fly from the Manage Categories panel.
