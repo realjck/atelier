@@ -16,8 +16,8 @@ body {
   font-size: 14px;
   color: var(--text);
   background:
-    radial-gradient(900px 500px at 0% 0%, rgb(91 61 245 / 0.14), transparent 60%),
-    radial-gradient(800px 500px at 100% 100%, rgb(91 61 245 / 0.12), transparent 60%),
+    radial-gradient(900px 500px at 0% 0%, var(--bg-glow-1), transparent 60%),
+    radial-gradient(800px 500px at 100% 100%, var(--bg-glow-2), transparent 60%),
     var(--bg);
   -webkit-font-smoothing: antialiased;
   /* Only the project list scrolls, never the whole page. */
@@ -112,13 +112,13 @@ button {
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .btn-primary:hover {
-  background: #6a4ff7;
-  border-color: #6a4ff7;
-  color: #fff;
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: var(--on-accent);
 }
 
 .btn-primary:disabled {
@@ -297,7 +297,7 @@ button {
   min-height: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: rgb(19 17 31 / 0.75);
+  background: var(--surface-glass);
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -528,7 +528,7 @@ button {
 }
 
 .table-dragging .row-dragging {
-  filter: drop-shadow(0 10px 24px rgb(0 0 0 / 0.45));
+  filter: drop-shadow(var(--shadow-lift));
 }
 
 .cell-muted {
@@ -623,9 +623,9 @@ button {
   gap: 12px;
   padding: 10px 10px 10px 18px;
   border-radius: var(--radius);
-  border: 1px solid rgb(240 90 126 / 0.4);
-  background: #2a1422;
-  color: #ffd5df;
+  border: 1px solid var(--toast-border);
+  background: var(--toast-bg);
+  color: var(--toast-text);
   box-shadow: var(--shadow-pop);
   z-index: 50;
 }
@@ -637,7 +637,7 @@ button {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgb(5 4 12 / 0.7);
+  background: var(--backdrop);
   backdrop-filter: blur(4px);
   z-index: 40;
 }
@@ -672,10 +672,9 @@ button {
   padding: 0 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: #0e0c1d;
+  background: var(--field);
   color: var(--text);
   outline: 0;
-  color-scheme: dark;
   transition: border-color 0.15s;
 }
 
@@ -726,7 +725,7 @@ button {
   padding: 0 14px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border);
-  background: #0e0c1d;
+  background: var(--field);
   color: var(--muted);
 }
 
@@ -821,20 +820,20 @@ button {
 .btn-danger {
   background: var(--danger);
   border-color: var(--danger);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .btn-danger:hover {
-  background: #f36d8d;
-  border-color: #f36d8d;
-  color: #fff;
+  background: var(--danger-hover);
+  border-color: var(--danger-hover);
+  color: var(--on-accent);
 }
 
 /* Manage Categories */
 .btn-manage {
   flex: none;
   align-self: flex-start;
-  border-color: rgb(139 108 255 / 0.45);
+  border-color: var(--accent-border);
   color: var(--text);
   font-size: 13px;
 }
@@ -915,7 +914,7 @@ button {
 
 .cat-name:focus {
   border-color: var(--accent-2);
-  background: #0e0c1d;
+  background: var(--field);
 }
 
 .cat-row .icon-btn:hover {
@@ -946,7 +945,7 @@ button {
 }
 
 .palette-swatch[aria-pressed="true"] {
-  border-color: #fff;
+  border-color: var(--swatch-ring);
 }
 
 .cat-add {
@@ -958,7 +957,7 @@ button {
   padding: 0 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: #0e0c1d;
+  background: var(--field);
   color: var(--muted);
   font-size: 15px;
 }

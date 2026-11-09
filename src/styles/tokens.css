@@ -13,6 +13,23 @@
   --online: #22c55e;
   --offline: #5f5a80;
 
+  --field: #0e0c1d;
+  --surface-glass: rgb(19 17 31 / 0.75);
+  --on-accent: #fff;
+  --accent-hover: #6a4ff7;
+  --accent-border: rgb(139 108 255 / 0.45);
+  --danger-hover: #f36d8d;
+  --toast-bg: #2a1422;
+  --toast-border: rgb(240 90 126 / 0.4);
+  --toast-text: #ffd5df;
+  --backdrop: rgb(5 4 12 / 0.7);
+  --swatch-ring: #fff;
+  --bg-glow-1: rgb(91 61 245 / 0.14);
+  --bg-glow-2: rgb(91 61 245 / 0.12);
+  --shadow-lift: 0 10px 24px rgb(0 0 0 / 0.45);
+  /* Native controls (date picker, scrollbars) follow the theme. */
+  color-scheme: dark;
+
   --radius: 12px;
   --radius-sm: 9px;
   --radius-pill: 999px;
