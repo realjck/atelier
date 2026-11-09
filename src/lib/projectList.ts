@@ -107,3 +107,18 @@ export function edgeScrollSpeed(pointerY: number, top: number, bottom: number): 
   if (pointerY > bottom - EDGE) return ramp(pointerY - (bottom - EDGE));
   return 0;
 }
+
+/** How fast emphasis fades with priority: about a third remains at priority 6. */
+const EMPHASIS_DECAY = 5;
+
+/**
+ * Font size (px) and weight for a project name: priority 1 is 20px bold, fading
+ * quickly over the first ranks down to a readable 14px regular.
+ */
+export function nameEmphasis(priority: number): { fontSize: number; fontWeight: number } {
+  const t = Math.exp(-(priority - 1) / EMPHASIS_DECAY);
+  return {
+    fontSize: Math.round((14 + 6 * t) * 10) / 10,
+    fontWeight: Math.round(400 + 300 * t),
+  };
+}

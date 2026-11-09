@@ -202,6 +202,12 @@ describe("ProjectTable", () => {
     expect(chevron()).toBe("desc");
   });
 
+  it("emphasizes_names_by_priority", () => {
+    setup();
+    expect(screen.getByText("Portfolio site redesign")).toHaveStyle({ fontSize: "20px", fontWeight: "700" });
+    expect(screen.getByText("Api")).toHaveStyle({ fontSize: "18.9px" });
+  });
+
   it("shows an empty state", () => {
     setup([]);
     expect(screen.getByText("No projects yet")).toBeInTheDocument();

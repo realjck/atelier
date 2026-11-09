@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Category, Project } from "../types";
-import { dropIndex, edgeScrollSpeed, filterProjects, moveProject, sortProjects } from "./projectList";
+import { dropIndex, edgeScrollSpeed, filterProjects, moveProject, nameEmphasis, sortProjects } from "./projectList";
 
 const categories: Category[] = [
   { id: 1, name: "Pro", color: "#3b82f6" },
@@ -121,5 +121,21 @@ describe("edgeScrollSpeed", () => {
   it("is_faster_closer_to_the_edge_and_capped_beyond_it", () => {
     expect(edgeScrollSpeed(590, 100, 600)).toBeGreaterThan(edgeScrollSpeed(570, 100, 600));
     expect(edgeScrollSpeed(700, 100, 600)).toBe(edgeScrollSpeed(600, 100, 600));
+  });
+});
+
+describe("nameEmphasis", () => {
+  it("is_largest_and_boldest_for_priority_one", () => {
+    expect(nameEmphasis(1)).toEqual({ fontSize: 20, fontWeight: 700 });
+  });
+  it("decreases_with_priority", () => {
+    for (let p = 1; p < 30; p++) {
+      expect(nameEmphasis(p + 1).fontSize).toBeLessThanOrEqual(nameEmphasis(p).fontSize);
+      expect(nameEmphasis(p + 1).fontWeight).toBeLessThanOrEqual(nameEmphasis(p).fontWeight);
+    }
+    expect(nameEmphasis(2).fontSize).toBeLessThan(nameEmphasis(1).fontSize);
+  });
+  it("never_goes_below_a_readable_floor", () => {
+    expect(nameEmphasis(500)).toEqual({ fontSize: 14, fontWeight: 400 });
   });
 });

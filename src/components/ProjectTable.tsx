@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
-import { dropIndex, edgeScrollSpeed, sortProjects, type SortDir, type SortKey } from "../lib/projectList";
+import { dropIndex, edgeScrollSpeed, nameEmphasis, sortProjects, type SortDir, type SortKey } from "../lib/projectList";
 import { detectProvider } from "../lib/repo";
 import { stateMeta } from "../lib/states";
 import type { Category, Project } from "../types";
@@ -231,7 +231,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
                     <span className="priority">{p.priority}</span>
                   )}
                 </td>
-                <td className="cell-name" title={p.name}>
+                <td className="cell-name" title={p.name} style={nameEmphasis(p.priority)}>
                   {p.name}
                 </td>
                 <td>
