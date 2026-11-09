@@ -308,6 +308,45 @@ button {
   border-collapse: collapse;
 }
 
+/* Fixed column widths; Name and Path split what is left. Priority fits a 3-digit number. */
+.col-priority {
+  width: 96px;
+}
+.col-category {
+  width: 150px;
+}
+.col-created {
+  width: 130px;
+}
+.col-state {
+  width: 146px;
+}
+.col-repo {
+  width: 84px;
+}
+.col-status {
+  width: 112px;
+}
+
+/* Narrow windows: tighten fixed columns so Name and Path keep a usable width. */
+@media (max-width: 1180px) {
+  .col-category {
+    width: 120px;
+  }
+  .col-created {
+    width: 120px;
+  }
+  .col-state {
+    width: 126px;
+  }
+  .col-repo {
+    width: 64px;
+  }
+  .col-status {
+    width: 104px;
+  }
+}
+
 .table th {
   position: sticky;
   top: 0;
@@ -393,6 +432,7 @@ button {
 }
 
 .cell-priority {
+  padding-right: 8px !important;
   color: var(--faint);
   font-size: 13px;
   font-variant-numeric: tabular-nums;

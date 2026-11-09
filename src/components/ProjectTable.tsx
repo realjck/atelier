@@ -33,17 +33,18 @@ interface Drag {
 
 /**
  * Fixed table layout: the table never scrolls sideways, cells truncate instead.
- * Columns with predictable content get fixed widths; Path takes what is left.
+ * Columns with short, predictable content get fixed widths (see `.col-*` in app.css);
+ * Name and Path have none, so they share the remaining space equally.
  */
-const COLUMNS: { key: SortKey; label: string; width?: string }[] = [
-  { key: "priority", label: "#", width: "84px" },
-  { key: "name", label: "Name", width: "22%" },
-  { key: "category", label: "Category", width: "13%" },
-  { key: "created", label: "Created", width: "130px" },
-  { key: "state", label: "State", width: "15%" },
+const COLUMNS: { key: SortKey; label: string }[] = [
+  { key: "priority", label: "#" },
+  { key: "name", label: "Name" },
+  { key: "category", label: "Category" },
+  { key: "created", label: "Created" },
+  { key: "state", label: "State" },
   { key: "path", label: "Path" },
-  { key: "repo", label: "Repo", width: "84px" },
-  { key: "status", label: "Status", width: "112px" },
+  { key: "repo", label: "Repo" },
+  { key: "status", label: "Status" },
 ];
 
 const dateFormat = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -172,7 +173,7 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
       <table className={`table${reorderable ? " table-reorderable" : ""}${drag ? " table-dragging" : ""}`}>
         <colgroup>
           {COLUMNS.map((col) => (
-            <col key={col.key} style={{ width: col.width }} />
+            <col key={col.key} className={`col-${col.key}`} />
           ))}
         </colgroup>
         <thead>
