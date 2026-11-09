@@ -208,6 +208,14 @@ describe("ProjectTable", () => {
     expect(screen.getByText("Api")).toHaveStyle({ fontSize: "18.9px" });
   });
 
+  it("sorting_scrolls_back_to_the_top", async () => {
+    setup();
+    const wrap = screen.getByRole("table").parentElement!;
+    wrap.scrollTop = 200;
+    await userEvent.click(screen.getByRole("button", { name: "Name" }));
+    expect(wrap.scrollTop).toBe(0);
+  });
+
   it("shows an empty state", () => {
     setup([]);
     expect(screen.getByText("No projects yet")).toBeInTheDocument();

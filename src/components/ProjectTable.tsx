@@ -154,8 +154,10 @@ export function ProjectTable({ projects, categories, onOpen, onOpenFolder, onOpe
     return undefined;
   }
 
+  /** A new order starts from its first row. */
   function toggleSort(key: SortKey) {
     setSort((s) => ({ key, dir: s.key === key && s.dir === "asc" ? "desc" : "asc" }));
+    wrapRef.current!.scrollTop = 0;
   }
 
   /** Runs a link action without also opening the row's edit modal. */
